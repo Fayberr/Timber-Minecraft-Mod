@@ -2,6 +2,7 @@ package net.fayber.timber;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -50,9 +51,11 @@ public class TimberMod implements ModInitializer {
     private void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher,
                                   CommandBuildContext buildContext,
                                   Commands.CommandSelection selection) {
-        dispatcher.register(Commands.literal("timber")
+        dispatcher.register(
+            Commands.literal("timber")
                 .requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
-                .then(Commands.literal("toggle")
+                .then(
+                    Commands.literal("toggle")
                         .executes(context -> {
                             ServerPlayer player = context.getSource().getPlayerOrException();
                             boolean disabled = treeFeller.toggle(player);
@@ -60,18 +63,62 @@ public class TimberMod implements ModInitializer {
                                     disabled ? "Timber felling disabled for you."
                                              : "Timber felling enabled for you."));
                             return 1;
-                        }))
-                .then(Commands.literal("config")
+                        })
+                )
+                .then(
+                    Commands.literal("config")
                         .executes(context -> showConfig(context.getSource()))
-                        .then(Commands.literal("get")
-                                .executes(context -> showConfig(context.getSource())))
-                        .then(Commands.literal("set")
-                                .then(Commands.argument("key", StringArgumentType.word())
-                                        .then(Commands.argument("value", StringArgumentType.word())
+                        .then(
+                            Commands.literal("get")
+                                .executes(context -> showConfig(context.getSource()))
+                        )
+                        .then(
+                            Commands.literal("set")
+                                .then(
+                                    Commands.argument("key", StringArgumentType.word())
+                                        .then(
+                                            Commands.argument("value", StringArgumentType.word())
                                                 .executes(context -> setConfig(
-                                                        context.getSource(),
-                                                        StringArgumentType.getString(context, "key"),
-                                                        StringArgumentType.getString(context, "value"))))))));
+                                                    context.getSource(),
+                                                    StringArgumentType.getString(context, "key"),
+                                                    StringArgumentType.getString(context, "value")
+                                                ))
+                                        )
+                                )
+                        )
+                )
+                .then(
+                    Commands.literal("settings")
+                        .executes(context -> {
+                            TimberSettingsMenu.open(context.getSource().getPlayerOrException(), 1);
+                            return 1;
+                        })
+                        .then(
+                            Commands.literal("1")
+                                .executes(context -> {
+                                    TimberSettingsMenu.open(context.getSource().getPlayerOrException(), 1);
+                                    return 1;
+                                })
+                        )
+                        .then(
+                            Commands.literal("2")
+                                .executes(context -> {
+                                    TimberSettingsMenu.open(context.getSource().getPlayerOrException(), 2);
+                                    return 1;
+                                })
+                        )
+                        .then(
+                            Commands.literal("toggle")
+                                .then(
+                                    Commands.argument("key", StringArgumentType.word())
+                                        .executes(context -> toggleSetting(
+                                            context.getSource(),
+                                            StringArgumentType.getString(context, "key")
+                                        ))
+                                )
+                        )
+                )
+        );
     }
 
     private int showConfig(CommandSourceStack source) {
@@ -93,5 +140,15 @@ public class TimberMod implements ModInitializer {
         source.sendFailure(Component.literal("[Timber] Unknown config key '" + key
                 + "'. Use /timber config get to list valid keys."));
         return 0;
+    }
+
+    private int toggleSetting(CommandSourceStack source, String key) throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        if (!TimberSettingsMenu.toggle(player, key)) {
+            source.sendFailure(Component.literal("[Timber] Unknown setting '" + key
+                    + "'. Boolean settings only."));
+            return 0;
+        }
+        return 1;
     }
 }

@@ -12,13 +12,19 @@ Requires operator level 2.
 - `/timber toggle` toggles Timber felling for yourself.
 - `/timber config` (or `/timber config get`) prints the current config.
 - `/timber config set <key> <value>` changes a setting.
+- `/timber settings` (or `/timber settings 1` / `2`) opens a clickable chat
+  menu that mirrors the original datapack's tellraw settings menu. Click a
+  setting to toggle it; use the `<` / `>` arrows to switch pages. This works on
+  dedicated servers too, not just in singleplayer.
 
 ## Configuration
 
 The config is stored in `config/timber.json` and defaults to the original
-datapack settings. You can change values in-game with `/timber config set`,
-edit the JSON file directly, or in singleplayer open the Mods screen
-(Mod Menu) and pick Timber for a GUI.
+datapack settings. You can change values in-game with `/timber config set` or
+`/timber settings`, edit the JSON file directly, or in singleplayer open the
+Mods screen (Mod Menu) and pick Timber for a GUI. When Cloth Config is
+installed the GUI uses the standard Cloth Config screen; without it a simple
+built-in screen is used instead.
 
 | Key | Default | Meaning |
 | --- | --- | --- |
@@ -52,7 +58,7 @@ edit the JSON file directly, or in singleplayer open the Mods screen
 
 - Runs on the server. The integrated server in singleplayer also works.
 - Clients do not need the mod installed.
-- The Mod Menu config screen is optional and client-side only (needs Mod Menu installed in singleplayer).
+- The Mod Menu config screen is optional and client-side only (needs Mod Menu installed in singleplayer). Cloth Config is optional and gives the nicer Cloth Config GUI.
 - Axe durability respects the Unbreaking enchantment.
 - Slow chop and auto-replant run per server tick.
 
@@ -61,6 +67,7 @@ edit the JSON file directly, or in singleplayer open the Mods screen
 - Fabric Loader 0.19.3 or newer for Minecraft 26.1.2.
 - Fabric API for 26.1.2.
 - Java 25.
+- Optional: Mod Menu and Cloth Config (for the in-game GUI).
 
 ## Building
 
