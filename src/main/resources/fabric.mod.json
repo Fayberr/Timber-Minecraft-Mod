@@ -3,7 +3,7 @@
 	"id": "timber",
 	"version": "${version}",
 	"name": "Timber",
-	"description": "Felling trees and giant fungi with a single chop. Configurable axes, leaves, durability, hunger and more.",
+	"description": "Break one log and the whole tree comes down. The classic Timber datapack, now a server-side Fabric mod.",
 	"authors": [
 		"Fayber"
 	],
