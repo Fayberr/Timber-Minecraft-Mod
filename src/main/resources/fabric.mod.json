@@ -12,6 +12,7 @@
 		"sources": "https://github.com/Fayberr/Timber-Minecraft-Mod"
 	},
 	"license": "GPL-3.0-or-later",
+	"icon": "assets/timber/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
