@@ -1,10 +1,9 @@
 # Timber
 
 A Fabric mod that fells whole trees (and optionally giant fungi) when you break
-one log, instead of leaving the rest of the tree floating in the air. Inspired
-by the classic Vanilla Tweaks Timber datapack, this is a full behaviour port
-into a server-side Fabric mod for Minecraft 26.1.2 (deobfuscated mappings,
-Java 25).
+one log, instead of leaving the rest of the tree floating in the air.
+
+Inspired by the classic Vanilla Tweaks Timber datapack.
 
 ## Command
 

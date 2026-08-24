@@ -3,7 +3,7 @@
 	"id": "timber",
 	"version": "${version}",
 	"name": "Timber",
-	"description": "Break one log and the whole tree comes down. The classic Timber datapack, now a server-side Fabric mod.",
+	"description": "Break one log and the whole tree comes down. Inspired by the classic Vanilla Tweaks Timber datapack.",
 	"authors": [
 		"Fayber"
 	],
