@@ -14,16 +14,18 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Destroys a set of blocks, either immediately or spread over several server
  * ticks (the datapack's "slow chop" mode). Also handles loot drops:
  * drop_loot=0 spawns items at the block position, drop_loot=1 gives them to
- * the breaking player's inventory. Slow chop always drops on the ground.
+ * the breaking player's inventory (also during slow chop, as long as the
+ * player is still online).
  */
 public class SlowChopManager {
 
-    private record PendingChop(ServerLevel level, ItemStack tool, ArrayDeque<BlockPos> positions) {}
+    private record PendingChop(ServerLevel level, UUID playerUuid, ItemStack tool, ArrayDeque<BlockPos> positions) {}
 
     private final TimberConfig config;
     private final List<PendingChop> pending = new ArrayList<>();
@@ -34,8 +36,9 @@ public class SlowChopManager {
     }
 
     /** Queue a set of positions to be destroyed over the next several ticks. */
-    public void enqueue(ServerLevel level, ItemStack tool, Collection<BlockPos> positions) {
-        pending.add(new PendingChop(level, tool.copy(), new ArrayDeque<>(positions)));
+    public void enqueue(ServerLevel level, ServerPlayer player, ItemStack tool, Collection<BlockPos> positions) {
+        UUID uuid = player != null ? player.getUUID() : null;
+        pending.add(new PendingChop(level, uuid, tool.copy(), new ArrayDeque<>(positions)));
     }
 
     /** Called every server tick. Advances the slow-chop clock. */
@@ -54,8 +57,11 @@ public class SlowChopManager {
             if (chop.level() != level) {
                 continue;
             }
+            ServerPlayer player = chop.playerUuid() != null
+                    ? level.getServer().getPlayerList().getPlayer(chop.playerUuid())
+                    : null;
             while (toDestroy > 0 && !chop.positions().isEmpty()) {
-                destroyOne(level, null, chop.tool(), chop.positions().poll(), false);
+                destroyOne(level, player, chop.tool(), chop.positions().poll(), config.dropLoot);
                 toDestroy--;
             }
         }
@@ -75,7 +81,8 @@ public class SlowChopManager {
             return;
         }
 
-        // Drops. In slow-chop mode we always drop on the ground (player may have moved on).
+        // Drops. When giveToInventory is true and the player is online, items go
+        // straight into their inventory; overflow falls on the ground.
         List<ItemStack> drops = Block.getDrops(state, level, pos, null, player, tool);
         for (ItemStack drop : drops) {
             boolean given = giveToInventory && player != null && player.getInventory().add(drop);

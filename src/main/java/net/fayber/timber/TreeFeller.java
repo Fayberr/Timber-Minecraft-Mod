@@ -268,7 +268,7 @@ public class TreeFeller {
 
         // Destroy (immediately or slowly).
         if (config.slowChop) {
-            slowChopManager.enqueue(level, stack, toDestroy);
+            slowChopManager.enqueue(level, player, stack, toDestroy);
         } else {
             slowChopManager.destroyNow(level, player, stack, toDestroy);
         }
