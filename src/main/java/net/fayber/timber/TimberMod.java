@@ -51,11 +51,16 @@ public class TimberMod implements ModInitializer {
     private void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher,
                                   CommandBuildContext buildContext,
                                   Commands.CommandSelection selection) {
+        // /timber settings is driven by clickable chat links (run_command). The
+        // client shows a "Confirm Command Execution" prompt for clicked commands
+        // whose node requires elevated permissions, so the settings subtree must
+        // not declare a permission requirement. It is checked server-side in the
+        // executors instead.
         dispatcher.register(
             Commands.literal("timber")
-                .requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
                 .then(
                     Commands.literal("toggle")
+                        .requires(source -> isOperator(source))
                         .executes(context -> {
                             ServerPlayer player = context.getSource().getPlayerOrException();
                             boolean disabled = treeFeller.toggle(player);
@@ -67,6 +72,7 @@ public class TimberMod implements ModInitializer {
                 )
                 .then(
                     Commands.literal("config")
+                        .requires(source -> isOperator(source))
                         .executes(context -> showConfig(context.getSource()))
                         .then(
                             Commands.literal("get")
@@ -89,23 +95,14 @@ public class TimberMod implements ModInitializer {
                 )
                 .then(
                     Commands.literal("settings")
-                        .executes(context -> {
-                            TimberSettingsMenu.open(context.getSource().getPlayerOrException(), 1);
-                            return 1;
-                        })
+                        .executes(context -> openSettings(context.getSource(), 1))
                         .then(
                             Commands.literal("1")
-                                .executes(context -> {
-                                    TimberSettingsMenu.open(context.getSource().getPlayerOrException(), 1);
-                                    return 1;
-                                })
+                                .executes(context -> openSettings(context.getSource(), 1))
                         )
                         .then(
                             Commands.literal("2")
-                                .executes(context -> {
-                                    TimberSettingsMenu.open(context.getSource().getPlayerOrException(), 2);
-                                    return 1;
-                                })
+                                .executes(context -> openSettings(context.getSource(), 2))
                         )
                         .then(
                             Commands.literal("toggle")
@@ -119,6 +116,19 @@ public class TimberMod implements ModInitializer {
                         )
                 )
         );
+    }
+
+    private static boolean isOperator(CommandSourceStack source) {
+        return source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
+    }
+
+    private int openSettings(CommandSourceStack source, int page) throws CommandSyntaxException {
+        if (!isOperator(source)) {
+            source.sendFailure(Component.literal("[Timber] This command requires operator level 2."));
+            return 0;
+        }
+        TimberSettingsMenu.open(source.getPlayerOrException(), page);
+        return 1;
     }
 
     private int showConfig(CommandSourceStack source) {
@@ -143,6 +153,10 @@ public class TimberMod implements ModInitializer {
     }
 
     private int toggleSetting(CommandSourceStack source, String key) throws CommandSyntaxException {
+        if (!isOperator(source)) {
+            source.sendFailure(Component.literal("[Timber] This command requires operator level 2."));
+            return 0;
+        }
         ServerPlayer player = source.getPlayerOrException();
         if (!TimberSettingsMenu.toggle(player, key)) {
             source.sendFailure(Component.literal("[Timber] Unknown setting '" + key
