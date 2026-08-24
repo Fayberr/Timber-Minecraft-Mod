@@ -263,7 +263,7 @@ public class TreeFeller {
             protectOtherStems(level, logs, caps);
             toDestroy.addAll(caps);
         } else if (config.destroyLeaves) {
-            toDestroy.addAll(flood(level, logs, false));
+            toDestroy.addAll(collectTreeLeaves(level, logs));
         }
 
         // Destroy (immediately or slowly).
@@ -351,6 +351,56 @@ public class TreeFeller {
         return result;
     }
 
+    /**
+     * Collects tree leaves to destroy the same way the datapack does: walk from
+     * each log through orthogonally adjacent leaves, only ever moving to a leaf
+     * whose vanilla {@code distance} property is strictly larger than the
+     * previous leaf's. This stops at the boundary between two touching canopies
+     * instead of flooding into every neighbouring tree.
+     */
+    private Set<BlockPos> collectTreeLeaves(ServerLevel level, Collection<BlockPos> logs) {
+        Set<BlockPos> destroyed = new LinkedHashSet<>();
+        Set<BlockPos> searched = new HashSet<>();
+        for (BlockPos log : logs) {
+            walkLeaves(level, log, 0, destroyed, searched);
+        }
+        return destroyed;
+    }
+
+    /**
+     * Recursive leaf walk. {@code parentDistance} is the vanilla distance of the
+     * leaf we came from (0 for a log). A leaf is destroyed only when reached via
+     * a strictly increasing distance path, mirroring the datapack's
+     * {@code leaf_distance_old < leaf_distance} rule.
+     */
+    private void walkLeaves(ServerLevel level, BlockPos pos, int parentDistance,
+                            Set<BlockPos> destroyed, Set<BlockPos> searched) {
+        for (BlockPos dir : ORTHO) {
+            BlockPos neighbour = pos.offset(dir);
+            if (searched.contains(neighbour)) {
+                continue;
+            }
+            BlockState state = level.getBlockState(neighbour);
+            if (!isLeafBlock(state)) {
+                continue;
+            }
+            int distance = leafDistance(state);
+            if (parentDistance < distance) {
+                searched.add(neighbour);
+                destroyed.add(neighbour);
+                walkLeaves(level, neighbour, distance, destroyed, searched);
+            }
+        }
+    }
+
+    /** Reads the vanilla {@code distance} leaf property (1..14); 0 if absent. */
+    private static int leafDistance(BlockState state) {
+        if (state.hasProperty(BlockStateProperties.DISTANCE)) {
+            return state.getValue(BlockStateProperties.DISTANCE);
+        }
+        return 0;
+    }
+
     /** If a cap touches a stem that is not part of this chop, protect all caps within 5 blocks. */
     private void protectOtherStems(ServerLevel level, Set<BlockPos> stems, Set<BlockPos> caps) {
         Set<BlockPos> protectedCaps = new HashSet<>();
@@ -431,13 +481,13 @@ public class TreeFeller {
 
     private static BlockPos[] buildLogOffsets(boolean fungus) {
         List<BlockPos> list = new ArrayList<>();
-        for (int dy = 1; dy <= 9; dy++) {
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dz = -1; dz <= 1; dz++) {
-                    list.add(new BlockPos(dx, dy, dz));
-                }
+        // y+1: full 3x3, one block at a time like the datapack's search.mcfunction.
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                list.add(new BlockPos(dx, 1, dz));
             }
         }
+        // y=0: 8-block ring.
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
                 if (dx == 0 && dz == 0) {
@@ -447,6 +497,7 @@ public class TreeFeller {
             }
         }
         if (fungus) {
+            // Fungi additionally reach the block two above the stem.
             list.add(new BlockPos(0, 2, 0));
         }
         return list.toArray(new BlockPos[0]);
@@ -454,11 +505,10 @@ public class TreeFeller {
 
     private static BlockPos[] buildDownOffsets() {
         List<BlockPos> list = new ArrayList<>();
-        for (int dy = -1; dy >= -9; dy--) {
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dz = -1; dz <= 1; dz++) {
-                    list.add(new BlockPos(dx, dy, dz));
-                }
+        // y-1: full 3x3 (search_down.mcfunction).
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                list.add(new BlockPos(dx, -1, dz));
             }
         }
         return list.toArray(new BlockPos[0]);
