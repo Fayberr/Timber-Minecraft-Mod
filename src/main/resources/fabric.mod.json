@@ -1,0 +1,27 @@
+{
+	"schemaVersion": 1,
+	"id": "timber",
+	"version": "${version}",
+	"name": "Timber",
+	"description": "Felling trees and giant fungi with a single chop. Configurable axes, leaves, durability, hunger and more.",
+	"authors": [
+		"Fayber"
+	],
+	"contact": {
+		"homepage": "https://github.com/Fayberr/Timber-Minecraft-Mod",
+		"sources": "https://github.com/Fayberr/Timber-Minecraft-Mod"
+	},
+	"license": "GPL-3.0-or-later",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.fayber.timber.TimberMod"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=${loader_version}",
+		"minecraft": "~${minecraft_version}",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
