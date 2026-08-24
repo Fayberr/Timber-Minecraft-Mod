@@ -5,39 +5,54 @@ one log, instead of leaving the rest of the tree floating in the air.
 
 Inspired by the classic Vanilla Tweaks Timber datapack.
 
-## Command
+## Commands
 
-- `/timber toggle` toggles Timber felling for yourself. Requires operator level 2.
+Requires operator level 2.
+
+- `/timber toggle` toggles Timber felling for yourself.
+- `/timber config` (or `/timber config get`) prints the current config.
+- `/timber config set <key> <value>` changes a setting.
 
 ## Configuration
 
-All options live in `TimberConfig.java` and default to the original datapack
-settings. Change the field values and rebuild to customise:
+The config is stored in `config/timber.json` and defaults to the original
+datapack settings. You can change values in-game with `/timber config set`,
+edit the JSON file directly, or in singleplayer open the Mods screen
+(Mod Menu) and pick Timber for a GUI.
 
-- `standing` (true): chop while not sneaking.
-- `sneaking` (false): also chop while sneaking.
-- `chopTrees` (true): fell trees (logs and leaves).
-- `chopFungi` (false): fell giant fungi (stems and caps).
-- `chopDown` (false): also search 9 blocks below the broken log.
-- `destroyLeaves` (true): destroy the attached leaves.
-- `plantSapling` (false): auto-replant a dropped sapling after a chop.
-- `slowChop` (false): break the tree gradually over several ticks instead of instantly.
-- `stopChopping` (true): stop mid-tree if the axe would break.
-- `wearOut` (true): axes lose one durability point per chopped log.
-- `dropLoot` (false): false drops items at the block, true gives them to your inventory.
-- `hunger` (false): apply hunger scaled to the tree size.
-- `stopSound` (false): silence the multi-block break noise.
-- `persistent` (false): also chop persistent (placed) leaves.
-- `woodenAxe` / `stoneAxe` / `copperAxe` / `ironAxe` / `goldenAxe` / `diamondAxe` / `netheriteAxe` (true): which axe tiers can fell trees.
-- `blocksPerChop` (1): blocks destroyed per slow-chop tick.
-- `timeBetweenChops` (1): ticks between slow-chop steps.
-- `maxTreeSize` (555): maximum number of logs counted as one tree.
-- `minLeavesFound` (5): minimum leaves attached before a tree is felled.
+| Key | Default | Meaning |
+| --- | --- | --- |
+| `standing` | true | Chop while not sneaking. |
+| `sneaking` | false | Also chop while sneaking. |
+| `chop_trees` | true | Fell trees (logs and leaves). |
+| `chop_fungi` | false | Fell giant fungi (stems and caps). |
+| `chop_down` | false | Also search one block below each log. |
+| `destroy_leaves` | true | Destroy the attached leaves. |
+| `plant_sapling` | false | Auto-replant a dropped sapling after a chop. |
+| `slow_chop` | false | Break the tree gradually over several ticks instead of instantly. |
+| `stop_chopping` | true | Stop mid-tree if the axe would break. |
+| `wear_out` | true | Axes lose one durability point per chopped log. |
+| `drop_loot` | false | False drops items at the block, true gives them to your inventory. |
+| `hunger` | false | Apply hunger scaled to the tree size. |
+| `stop_sound` | false | Silence the multi-block break noise. |
+| `persistent` | false | Also chop persistent (placed) leaves. |
+| `wooden_axe` | true | Wooden axes may fell trees. |
+| `stone_axe` | true | Stone axes may fell trees. |
+| `copper_axe` | true | Copper axes may fell trees. |
+| `iron_axe` | true | Iron axes may fell trees. |
+| `golden_axe` | true | Golden axes may fell trees. |
+| `diamond_axe` | true | Diamond axes may fell trees. |
+| `netherite_axe` | true | Netherite axes may fell trees. |
+| `blocks_per_chop` | 1 | Blocks destroyed per slow-chop tick. |
+| `time_between_chops` | 1 | Ticks between slow-chop steps. |
+| `max_tree_size` | 555 | Maximum number of logs counted as one tree. |
+| `min_leaves_found` | 5 | Minimum leaves attached before a tree is felled. |
 
 ## Details
 
 - Runs on the server. The integrated server in singleplayer also works.
 - Clients do not need the mod installed.
+- The Mod Menu config screen is optional and client-side only (needs Mod Menu installed in singleplayer).
 - Axe durability respects the Unbreaking enchantment.
 - Slow chop and auto-replant run per server tick.
 

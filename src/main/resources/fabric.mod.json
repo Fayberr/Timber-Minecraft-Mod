@@ -17,6 +17,9 @@
 	"entrypoints": {
 		"main": [
 			"net.fayber.timber.TimberMod"
+		],
+		"modmenu": [
+			"net.fayber.timber.TimberModMenu"
 		]
 	},
 	"depends": {

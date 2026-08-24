@@ -1,6 +1,7 @@
 package net.fayber.timber;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -13,22 +14,30 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TimberMod implements ModInitializer {
+    public static final String MOD_ID = "timber";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-    private final TimberConfig config = new TimberConfig();
+    private final TimberConfig config = TimberConfig.get();
     private final SlowChopManager slowChopManager = new SlowChopManager(config);
     private final AutoPlanter autoPlanter = new AutoPlanter();
     private final TreeFeller treeFeller = new TreeFeller(config, slowChopManager, autoPlanter);
 
     @Override
     public void onInitialize() {
+        TimberConfig.load();
+
         PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) ->
                 treeFeller.onBlockBreak(level, player, pos, state));
 
         ServerTickEvents.END_SERVER_TICK.register(this::onServerTick);
 
         CommandRegistrationCallback.EVENT.register(this::registerCommands);
+
+        LOGGER.info("[Timber] Initialized. Config: {}", config);
     }
 
     private void onServerTick(MinecraftServer server) {
@@ -51,6 +60,38 @@ public class TimberMod implements ModInitializer {
                                     disabled ? "Timber felling disabled for you."
                                              : "Timber felling enabled for you."));
                             return 1;
-                        })));
+                        }))
+                .then(Commands.literal("config")
+                        .executes(context -> showConfig(context.getSource()))
+                        .then(Commands.literal("get")
+                                .executes(context -> showConfig(context.getSource())))
+                        .then(Commands.literal("set")
+                                .then(Commands.argument("key", StringArgumentType.word())
+                                        .then(Commands.argument("value", StringArgumentType.word())
+                                                .executes(context -> setConfig(
+                                                        context.getSource(),
+                                                        StringArgumentType.getString(context, "key"),
+                                                        StringArgumentType.getString(context, "value"))))))));
+    }
+
+    private int showConfig(CommandSourceStack source) {
+        source.sendSuccess(() -> Component.literal("[Timber] Config: " + TimberConfig.get()), false);
+        return 1;
+    }
+
+    private int setConfig(CommandSourceStack source, String key, String value) {
+        try {
+            if (TimberConfig.set(key, value)) {
+                source.sendSuccess(() -> Component.literal("[Timber] Set " + key
+                        + " to " + value + ". New config: " + TimberConfig.get()), true);
+                return 1;
+            }
+        } catch (NumberFormatException e) {
+            source.sendFailure(Component.literal("[Timber] " + key + " expects a number."));
+            return 0;
+        }
+        source.sendFailure(Component.literal("[Timber] Unknown config key '" + key
+                + "'. Use /timber config get to list valid keys."));
+        return 0;
     }
 }
