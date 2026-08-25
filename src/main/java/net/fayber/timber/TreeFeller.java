@@ -92,36 +92,43 @@ public class TreeFeller {
         return true;
     }
 
-    /** Entry point, wired to PlayerBlockBreakEvents.BEFORE. Returns true to cancel the vanilla break. */
+    /**
+     * Entry point, wired to PlayerBlockBreakEvents.BEFORE.
+     *
+     * Fabric contract: return {@code true} to allow the break to proceed (pass
+     * to the next listener) and {@code false} to cancel it. We return
+     * {@code false} only when Timber destroys the origin block itself (direct
+     * to inventory), so every other break proceeds through vanilla untouched.
+     */
     public boolean onBlockBreakBefore(Level level, Player player, BlockPos pos, BlockState state) {
         if (level.isClientSide()) {
-            return false;
+            return true;
         }
         if (!(level instanceof ServerLevel serverLevel)) {
-            return false;
+            return true;
         }
         if (!(player instanceof ServerPlayer serverPlayer)) {
-            return false;
+            return true;
         }
         if (disabledPlayers.contains(serverPlayer.getUUID())) {
-            return false;
+            return true;
         }
 
         ItemStack stack = serverPlayer.getMainHandItem();
         if (stack.isEmpty()) {
-            return false;
+            return true;
         }
         if (!stack.is(h -> h.is(ItemTags.AXES))) {
-            return false;
+            return true;
         }
         if (!isAxeEnabled(stack)) {
-            return false;
+            return true;
         }
 
         boolean sneaking = serverPlayer.isShiftKeyDown();
         boolean allowed = (config.standing && !sneaking) || (config.sneaking && sneaking);
         if (!allowed) {
-            return false;
+            return true;
         }
 
         if (config.chopTrees && isLogBlock(state)) {
@@ -130,7 +137,7 @@ public class TreeFeller {
         if (config.chopFungi && isStemBlock(state)) {
             return chop(serverLevel, serverPlayer, pos, stack, true);
         }
-        return false;
+        return true;
     }
 
     // ------------------------------------------------------------------
@@ -262,7 +269,8 @@ public class TreeFeller {
 
         int treeSize = logs.size();
         if (treeSize == 0 || leaves.size() < config.minLeavesFound) {
-            return false;
+            // Not a valid tree: let vanilla break the block normally.
+            return true;
         }
 
         // Determine the full block set to destroy. The origin goes first so the
@@ -312,9 +320,10 @@ public class TreeFeller {
             autoPlanter.schedule(level, origin);
         }
 
-        // Cancel the vanilla break only when we collected the origin block into
-        // the inventory; otherwise vanilla breaks it (dropping loot normally).
-        return collectOrigin;
+        // Cancel the vanilla break (return false) only when we collected the
+        // origin block into the inventory; otherwise allow vanilla to break it
+        // (dropping loot normally).
+        return !collectOrigin;
     }
 
     // ------------------------------------------------------------------

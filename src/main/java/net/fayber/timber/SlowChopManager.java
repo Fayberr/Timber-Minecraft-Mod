@@ -1,6 +1,7 @@
 package net.fayber.timber;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -41,8 +42,9 @@ public class SlowChopManager {
         pending.add(new PendingChop(level, uuid, tool.copy(), new ArrayDeque<>(positions)));
     }
 
-    /** Called every server tick. Advances the slow-chop clock. */
-    public void tick(ServerLevel level) {
+    /** Called once per server tick. Advances the slow-chop clock once, then
+     * advances every pending chop (across all dimensions) by its own budget. */
+    public void tick(MinecraftServer server) {
         if (pending.isEmpty()) {
             return;
         }
@@ -53,11 +55,9 @@ public class SlowChopManager {
         ticks = 0;
 
         for (PendingChop chop : pending) {
-            if (chop.level() != level) {
-                continue;
-            }
+            ServerLevel level = chop.level();
             ServerPlayer player = chop.playerUuid() != null
-                    ? level.getServer().getPlayerList().getPlayer(chop.playerUuid())
+                    ? server.getPlayerList().getPlayer(chop.playerUuid())
                     : null;
             // Each pending tree gets its own blocksPerChop budget so multiple
             // trees chop simultaneously instead of one draining the budget.

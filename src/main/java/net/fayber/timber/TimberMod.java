@@ -12,7 +12,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
 import org.slf4j.Logger;
@@ -42,10 +41,8 @@ public class TimberMod implements ModInitializer {
     }
 
     private void onServerTick(MinecraftServer server) {
-        for (ServerLevel level : server.getAllLevels()) {
-            slowChopManager.tick(level);
-            autoPlanter.tick(level);
-        }
+        slowChopManager.tick(server);
+        autoPlanter.tick(server);
     }
 
     private void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher,

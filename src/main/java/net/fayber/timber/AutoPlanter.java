@@ -1,6 +1,7 @@
 package net.fayber.timber;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.item.FallingBlockEntity;
@@ -33,21 +34,22 @@ public class AutoPlanter {
         pending.computeIfAbsent(level, k -> new ArrayList<>()).add(pos.immutable());
     }
 
-    /** Called every server tick. */
-    public void tick(ServerLevel level) {
+    /** Called once per server tick. */
+    public void tick(MinecraftServer server) {
         tick++;
         if (tick < INTERVAL) {
             return;
         }
         tick = 0;
 
-        List<BlockPos> positions = pending.remove(level);
-        if (positions == null || positions.isEmpty()) {
-            return;
-        }
-
-        for (BlockPos origin : positions) {
-            scanAndPlant(level, origin);
+        for (ServerLevel level : server.getAllLevels()) {
+            List<BlockPos> positions = pending.remove(level);
+            if (positions == null || positions.isEmpty()) {
+                continue;
+            }
+            for (BlockPos origin : positions) {
+                scanAndPlant(level, origin);
+            }
         }
     }
 
