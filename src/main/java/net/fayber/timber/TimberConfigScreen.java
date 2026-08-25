@@ -79,17 +79,17 @@ public class TimberConfigScreen extends Screen {
 
         if (page > 0) {
             this.addRenderableWidget(Button.builder(Component.literal("Back"), button ->
-                            this.minecraft.setScreen(new TimberConfigScreen(this.parent, this.page - 1)))
+                            this.minecraft.setScreenAndShow(new TimberConfigScreen(this.parent, this.page - 1)))
                     .bounds(centerX - 155, this.height - 30, 100, 20)
                     .build());
         }
         this.addRenderableWidget(Button.builder(Component.translatable("gui.done"), button ->
-                        this.minecraft.setScreen(this.parent))
+                        this.minecraft.setScreenAndShow(this.parent))
                 .bounds(centerX - 50, this.height - 30, 100, 20)
                 .build());
         if (page < PAGES - 1) {
             this.addRenderableWidget(Button.builder(Component.literal("Next"), button ->
-                            this.minecraft.setScreen(new TimberConfigScreen(this.parent, this.page + 1)))
+                            this.minecraft.setScreenAndShow(new TimberConfigScreen(this.parent, this.page + 1)))
                     .bounds(centerX + 55, this.height - 30, 100, 20)
                     .build());
         }
@@ -143,6 +143,6 @@ public class TimberConfigScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(this.parent);
+        this.minecraft.setScreenAndShow(this.parent);
     }
 }

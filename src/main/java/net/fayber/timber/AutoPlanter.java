@@ -1,13 +1,17 @@
 package net.fayber.timber;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.entity.EntityTypeTest;
@@ -25,6 +29,10 @@ import java.util.Map;
 public class AutoPlanter {
 
     private static final int INTERVAL = 40;
+
+    /** 26.2 removed BlockTags.SAPLINGS; the vanilla #minecraft:saplings tag still exists. */
+    private static final TagKey<Block> SAPLINGS =
+            TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("minecraft", "saplings"));
 
     private final Map<ServerLevel, List<BlockPos>> pending = new HashMap<>();
     private int tick;
@@ -62,7 +70,7 @@ public class AutoPlanter {
                 continue;
             }
             BlockState saplingState = blockItem.getBlock().defaultBlockState();
-            if (!saplingState.getBlock().builtInRegistryHolder().is(BlockTags.SAPLINGS)) {
+            if (!saplingState.getBlock().builtInRegistryHolder().is(SAPLINGS)) {
                 continue;
             }
 
