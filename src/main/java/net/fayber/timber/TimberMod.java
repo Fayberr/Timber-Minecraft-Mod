@@ -31,8 +31,8 @@ public class TimberMod implements ModInitializer {
     public void onInitialize() {
         TimberConfig.load();
 
-        PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) ->
-                treeFeller.onBlockBreak(level, player, pos, state));
+        PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) ->
+                treeFeller.onBlockBreakBefore(level, player, pos, state));
 
         ServerTickEvents.END_SERVER_TICK.register(this::onServerTick);
 

@@ -52,7 +52,6 @@ public class SlowChopManager {
         }
         ticks = 0;
 
-        int toDestroy = config.blocksPerChop;
         for (PendingChop chop : pending) {
             if (chop.level() != level) {
                 continue;
@@ -60,6 +59,9 @@ public class SlowChopManager {
             ServerPlayer player = chop.playerUuid() != null
                     ? level.getServer().getPlayerList().getPlayer(chop.playerUuid())
                     : null;
+            // Each pending tree gets its own blocksPerChop budget so multiple
+            // trees chop simultaneously instead of one draining the budget.
+            int toDestroy = config.blocksPerChop;
             while (toDestroy > 0 && !chop.positions().isEmpty()) {
                 destroyOne(level, player, chop.tool(), chop.positions().poll(), config.dropLoot);
                 toDestroy--;

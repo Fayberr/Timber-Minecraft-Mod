@@ -92,43 +92,45 @@ public class TreeFeller {
         return true;
     }
 
-    /** Entry point, wired to PlayerBlockBreakEvents.AFTER. */
-    public void onBlockBreak(Level level, Player player, BlockPos pos, BlockState state) {
+    /** Entry point, wired to PlayerBlockBreakEvents.BEFORE. Returns true to cancel the vanilla break. */
+    public boolean onBlockBreakBefore(Level level, Player player, BlockPos pos, BlockState state) {
         if (level.isClientSide()) {
-            return;
+            return false;
         }
         if (!(level instanceof ServerLevel serverLevel)) {
-            return;
+            return false;
         }
         if (!(player instanceof ServerPlayer serverPlayer)) {
-            return;
+            return false;
         }
         if (disabledPlayers.contains(serverPlayer.getUUID())) {
-            return;
+            return false;
         }
 
         ItemStack stack = serverPlayer.getMainHandItem();
         if (stack.isEmpty()) {
-            return;
+            return false;
         }
         if (!stack.is(h -> h.is(ItemTags.AXES))) {
-            return;
+            return false;
         }
         if (!isAxeEnabled(stack)) {
-            return;
+            return false;
         }
 
         boolean sneaking = serverPlayer.isShiftKeyDown();
         boolean allowed = (config.standing && !sneaking) || (config.sneaking && sneaking);
         if (!allowed) {
-            return;
+            return false;
         }
 
         if (config.chopTrees && isLogBlock(state)) {
-            chop(serverLevel, serverPlayer, pos, stack, false);
-        } else if (config.chopFungi && isStemBlock(state)) {
-            chop(serverLevel, serverPlayer, pos, stack, true);
+            return chop(serverLevel, serverPlayer, pos, stack, false);
         }
+        if (config.chopFungi && isStemBlock(state)) {
+            return chop(serverLevel, serverPlayer, pos, stack, true);
+        }
+        return false;
     }
 
     // ------------------------------------------------------------------
@@ -194,20 +196,27 @@ public class TreeFeller {
     // Main chop
     // ------------------------------------------------------------------
 
-    private void chop(ServerLevel level, ServerPlayer player, BlockPos origin, ItemStack stack, boolean fungus) {
+    private boolean chop(ServerLevel level, ServerPlayer player, BlockPos origin, ItemStack stack, boolean fungus) {
         int maxTreeSize = config.maxTreeSize;
         Set<BlockPos> logs = new LinkedHashSet<>();
         Set<BlockPos> leaves = new LinkedHashSet<>();
         ArrayDeque<BlockPos> queue = new ArrayDeque<>();
 
+        // When direct-to-inventory is on we also collect the block the player
+        // just broke (by cancelling its vanilla break), so the whole tree goes
+        // into the inventory consistently.
+        boolean collectOrigin = config.dropLoot;
         boolean unbreakable = isUnbreakable(stack);
-        int durability = stack.getDamageValue() - 1;
+        // Vanilla has not yet consumed the origin's durability when collectOrigin
+        // is true (we cancel it), so start one point higher in that case.
+        int durability = stack.getDamageValue() - (collectOrigin ? 0 : 1);
         int threshold = stack.getMaxDamage();
         boolean exhausted = false;
 
         BlockPos[] offsets = fungus ? fungusOffsets : logOffsets;
 
-        // Seed the scan from the broken block (already air; vanilla consumed its durability).
+        // Seed the scan from the broken block. With direct-to-inventory we cancel
+        // the vanilla break, so the origin is still a log here and gets collected below.
         addNeighbours(level, origin, offsets, queue, fungus);
         if (config.chopDown) {
             addNeighbours(level, origin, downOffsets, queue, fungus);
@@ -253,11 +262,16 @@ public class TreeFeller {
 
         int treeSize = logs.size();
         if (treeSize == 0 || leaves.size() < config.minLeavesFound) {
-            return;
+            return false;
         }
 
-        // Determine the full block set to destroy.
-        Set<BlockPos> toDestroy = new LinkedHashSet<>(logs);
+        // Determine the full block set to destroy. The origin goes first so the
+        // block the player broke disappears immediately even during slow chop.
+        Set<BlockPos> toDestroy = new LinkedHashSet<>();
+        if (collectOrigin) {
+            toDestroy.add(origin);
+        }
+        toDestroy.addAll(logs);
         if (fungus) {
             Set<BlockPos> caps = flood(level, logs, true);
             protectOtherStems(level, logs, caps);
@@ -297,6 +311,10 @@ public class TreeFeller {
         if (config.plantSapling) {
             autoPlanter.schedule(level, origin);
         }
+
+        // Cancel the vanilla break only when we collected the origin block into
+        // the inventory; otherwise vanilla breaks it (dropping loot normally).
+        return collectOrigin;
     }
 
     // ------------------------------------------------------------------
