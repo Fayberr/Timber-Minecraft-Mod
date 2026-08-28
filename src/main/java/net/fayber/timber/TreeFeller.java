@@ -39,10 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * The core Timber logic: detects a broken log/stem and fells the whole tree
- * or giant fungus connected to it, honouring every datapack config option.
- */
+// core timber logic: one log breaks, the whole tree (or giant fungus) goes down.
 public class TreeFeller {
 
     // 6 orthogonal directions.
@@ -81,7 +78,7 @@ public class TreeFeller {
         return disabledPlayers.contains(uuid);
     }
 
-    /** Toggles the player's Timber state. Returns true if now disabled. */
+    // returns true if the player is now disabled
     public boolean toggle(ServerPlayer player) {
         UUID uuid = player.getUUID();
         if (disabledPlayers.contains(uuid)) {
@@ -92,14 +89,9 @@ public class TreeFeller {
         return true;
     }
 
-    /**
-     * Entry point, wired to PlayerBlockBreakEvents.BEFORE.
-     *
-     * Fabric contract: return {@code true} to allow the break to proceed (pass
-     * to the next listener) and {@code false} to cancel it. We return
-     * {@code false} only when Timber destroys the origin block itself (direct
-     * to inventory), so every other break proceeds through vanilla untouched.
-     */
+    // wired to PlayerBlockBreakEvents.BEFORE. fabric contract: return true to let
+    // the break proceed, false to cancel it. we only cancel when timber destroys
+    // the origin block itself (direct to inventory), everything else goes through vanilla.
     public boolean onBlockBreakBefore(Level level, Player player, BlockPos pos, BlockState state) {
         if (level.isClientSide()) {
             return true;
@@ -213,10 +205,11 @@ public class TreeFeller {
         // just broke (by cancelling its vanilla break), so the whole tree goes
         // into the inventory consistently.
         boolean collectOrigin = config.dropLoot;
-        boolean unbreakable = isUnbreakable(stack);
-        // Vanilla has not yet consumed the origin's durability when collectOrigin
-        // is true (we cancel it), so start one point higher in that case.
-        int durability = stack.getDamageValue() - (collectOrigin ? 0 : 1);
+        // creative players never pay durability, same as vanilla tool use
+        boolean unbreakable = isUnbreakable(stack) || player.isCreative();
+        // the origin log costs 1 durability either way: vanilla charges it later
+        // when we don't cancel the break, otherwise we charge it right here
+        int durability = stack.getDamageValue() + (collectOrigin ? 1 : -1);
         int threshold = stack.getMaxDamage();
         boolean exhausted = false;
 
@@ -340,7 +333,7 @@ public class TreeFeller {
         }
     }
 
-    /** Multi-source flood from the logs to collect connected leaves or fungus caps. */
+    // multi-source flood from the logs to collect connected fungus caps.
     private Set<BlockPos> flood(ServerLevel level, Collection<BlockPos> logs, boolean fungus) {
         Set<BlockPos> result = new LinkedHashSet<>();
         Map<BlockPos, Integer> distance = new HashMap<>();
@@ -358,7 +351,10 @@ public class TreeFeller {
             }
         }
 
-        while (!queue.isEmpty()) {
+        // hard cap so a giant wart structure can't balloon into thousands of
+        // queued block updates on top of the log cap
+        int cap = Math.max(256, config.maxTreeSize * 4);
+        while (!queue.isEmpty() && result.size() < cap) {
             BlockPos p = queue.poll();
             int d = distance.get(p);
             result.add(p);
@@ -378,13 +374,9 @@ public class TreeFeller {
         return result;
     }
 
-    /**
-     * Collects tree leaves to destroy the same way the datapack does: walk from
-     * each log through orthogonally adjacent leaves, only ever moving to a leaf
-     * whose vanilla {@code distance} property is strictly larger than the
-     * previous leaf's. This stops at the boundary between two touching canopies
-     * instead of flooding into every neighbouring tree.
-     */
+    // walks from each log through orthogonally adjacent leaves, only moving to a
+    // leaf whose vanilla distance property is strictly larger than the previous
+    // one. stops at the boundary between two touching canopies, like the datapack.
     private Set<BlockPos> collectTreeLeaves(ServerLevel level, Collection<BlockPos> logs) {
         Set<BlockPos> destroyed = new LinkedHashSet<>();
         Set<BlockPos> searched = new HashSet<>();
@@ -394,12 +386,9 @@ public class TreeFeller {
         return destroyed;
     }
 
-    /**
-     * Recursive leaf walk. {@code parentDistance} is the vanilla distance of the
-     * leaf we came from (0 for a log). A leaf is destroyed only when reached via
-     * a strictly increasing distance path, mirroring the datapack's
-     * {@code leaf_distance_old < leaf_distance} rule.
-     */
+    // parentDistance is the vanilla distance of the leaf we came from (0 for a log).
+    // a leaf only falls when reached via a strictly increasing distance path, the
+    // datapack's leaf_distance_old < leaf_distance rule.
     private void walkLeaves(ServerLevel level, BlockPos pos, int parentDistance,
                             Set<BlockPos> destroyed, Set<BlockPos> searched) {
         for (BlockPos dir : ORTHO) {
@@ -420,7 +409,7 @@ public class TreeFeller {
         }
     }
 
-    /** Reads the vanilla {@code distance} leaf property (1..14); 0 if absent. */
+    // vanilla leaf distance property (1..7), 0 if absent
     private static int leafDistance(BlockState state) {
         if (state.hasProperty(BlockStateProperties.DISTANCE)) {
             return state.getValue(BlockStateProperties.DISTANCE);
@@ -428,7 +417,7 @@ public class TreeFeller {
         return 0;
     }
 
-    /** If a cap touches a stem that is not part of this chop, protect all caps within 5 blocks. */
+    // if a cap touches a stem that isn't part of this chop, protect all caps within 5 blocks of it
     private void protectOtherStems(ServerLevel level, Set<BlockPos> stems, Set<BlockPos> caps) {
         Set<BlockPos> protectedCaps = new HashSet<>();
         for (BlockPos cap : caps) {

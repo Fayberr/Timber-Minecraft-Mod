@@ -6,13 +6,11 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-/**
- * Hand-rolled ModMenu config screen. Every control writes through
- * {@link TimberConfig#set(String, String)}, which updates the in-memory config
- * and saves it to {@code config/timber.json}. In singleplayer the integrated
- * server shares the same static config, so changes apply live. The 25 settings
- * are spread over four pages so they fit at any GUI scale.
- */
+// hand-rolled ModMenu config screen. every control writes through
+// TimberConfig.set, which updates the in-memory config and saves it to
+// config/timber.json. in singleplayer the integrated server shares the same
+// static config, so changes apply live. the 25 settings are spread over four
+// pages so they fit at any GUI scale.
 public class TimberConfigScreen extends Screen {
     private static final int PAGES = 4;
     private static final int SPACING = 22;
@@ -95,7 +93,7 @@ public class TimberConfigScreen extends Screen {
         }
     }
 
-    /** A toggle that flips the named boolean config key and saves it. */
+    // a toggle that flips the named boolean config key and saves it.
     private int addBool(String key, String label, int centerX, int y) {
         boolean current = TimberConfig.getBool(key);
         this.addRenderableWidget(Button.builder(toggleText(label, current), button -> {
@@ -106,7 +104,7 @@ public class TimberConfigScreen extends Screen {
         return y + SPACING;
     }
 
-    /** An integer slider that writes the named config key and saves it. */
+    // an integer slider that writes the named config key and saves it.
     private void addSlider(SliderSpec spec, int centerX, int y) {
         int current = TimberConfig.getInt(spec.key);
         double range = spec.max - spec.min;
