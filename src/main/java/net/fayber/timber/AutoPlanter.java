@@ -22,27 +22,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Replants saplings that end up on the ground after a chop, every 40 ticks.
- * Mirrors the datapack's autoplant behaviour.
- */
+// replants saplings that end up on the ground after a chop, every 40 ticks.
+// mirrors the datapack's autoplant behaviour.
 public class AutoPlanter {
 
     private static final int INTERVAL = 40;
 
-    /** 26.2 removed BlockTags.SAPLINGS; the vanilla #minecraft:saplings tag still exists. */
+    // 26.2 removed BlockTags.SAPLINGS; the vanilla #minecraft:saplings tag still exists.
     private static final TagKey<Block> SAPLINGS =
             TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("minecraft", "saplings"));
 
     private final Map<ServerLevel, List<BlockPos>> pending = new HashMap<>();
     private int tick;
 
-    /** Remember the chop site; saplings near it will be planted on the next sweep. */
+    // remember the chop site; saplings near it will be planted on the next sweep.
     public void schedule(ServerLevel level, BlockPos pos) {
         pending.computeIfAbsent(level, k -> new ArrayList<>()).add(pos.immutable());
     }
 
-    /** Called once per server tick. */
+    // called once per server tick.
     public void tick(MinecraftServer server) {
         tick++;
         if (tick < INTERVAL) {

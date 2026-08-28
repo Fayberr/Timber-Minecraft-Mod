@@ -8,12 +8,10 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * A clickable chat menu, the mod equivalent of the datapack's tellraw settings
- * menu. Two pages of {@code [ ✔ ]} / {@code [ ❌ ]} toggles plus {@code [ ✎ ]}
- * value prompts, all with the datapack's hover descriptions. Works on dedicated
- * servers too (the ModMenu GUI is singleplayer-only).
- */
+// a clickable chat menu, the mod equivalent of the datapack's tellraw settings
+// menu. two pages of [ ✔ ] / [ ❌ ] toggles plus [ ✎ ] value prompts, all with
+// the datapack's hover descriptions. works on dedicated servers too (the
+// ModMenu GUI is singleplayer-only).
 public final class TimberSettingsMenu {
     private TimberSettingsMenu() {}
 
@@ -27,7 +25,7 @@ public final class TimberSettingsMenu {
         footer(player);
     }
 
-    /** Flips a boolean setting and re-opens the menu on that setting's page. */
+    // flips a boolean setting and re-opens the menu on that setting's page.
     public static boolean toggle(ServerPlayer player, String key) {
         String value = String.valueOf(!TimberConfig.getBool(key));
         try {

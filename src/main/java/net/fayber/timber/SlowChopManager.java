@@ -17,13 +17,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Destroys a set of blocks, either immediately or spread over several server
- * ticks (the datapack's "slow chop" mode). Also handles loot drops:
- * drop_loot=0 spawns items at the block position, drop_loot=1 gives them to
- * the breaking player's inventory (also during slow chop, as long as the
- * player is still online).
- */
+// destroys a set of blocks, either immediately or spread over several server
+// ticks (the datapack's "slow chop" mode). also handles loot drops:
+// drop_loot=0 spawns items at the block position, drop_loot=1 gives them to
+// the breaking player's inventory (also during slow chop, as long as the
+// player is still online).
 public class SlowChopManager {
 
     private record PendingChop(ServerLevel level, UUID playerUuid, ItemStack tool, ArrayDeque<BlockPos> positions) {}
@@ -36,14 +34,14 @@ public class SlowChopManager {
         this.config = config;
     }
 
-    /** Queue a set of positions to be destroyed over the next several ticks. */
+    // queue a set of positions to be destroyed over the next several ticks.
     public void enqueue(ServerLevel level, ServerPlayer player, ItemStack tool, Collection<BlockPos> positions) {
         UUID uuid = player != null ? player.getUUID() : null;
         pending.add(new PendingChop(level, uuid, tool.copy(), new ArrayDeque<>(positions)));
     }
 
-    /** Called once per server tick. Advances the slow-chop clock once, then
-     * advances every pending chop (across all dimensions) by its own budget. */
+    // called once per server tick. advances the slow-chop clock once, then
+    // advances every pending chop (across all dimensions) by its own budget.
     public void tick(MinecraftServer server) {
         if (pending.isEmpty()) {
             return;
@@ -70,7 +68,7 @@ public class SlowChopManager {
         pending.removeIf(c -> c.positions().isEmpty());
     }
 
-    /** Immediate destruction (non slow-chop mode). */
+    // immediate destruction (non slow-chop mode).
     public void destroyNow(ServerLevel level, ServerPlayer player, ItemStack tool, Collection<BlockPos> positions) {
         for (BlockPos pos : positions) {
             destroyOne(level, player, tool, pos, config.dropLoot);

@@ -10,15 +10,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-/**
- * Mod config, stored as {@code config/timber.json}. Defaults mirror the
- * Vanilla Tweaks Timber datapack. Values can be changed in-game with
- * {@code /timber config} or, in singleplayer, from the ModMenu config screen.
- *
- * <p>The shared instance is mutated in place by {@link #load()} so the
- * {@link TreeFeller} and {@link SlowChopManager} (which hold a reference to
- * {@link #get()}) always see the current values, including after a reload.
- */
+// mod config, stored as config/timber.json. defaults mirror the Vanilla Tweaks
+// Timber datapack. values can be changed in-game with /timber config or, in
+// singleplayer, from the ModMenu config screen.
+//
+// the shared instance is mutated in place by load() so TreeFeller and
+// SlowChopManager (which hold a reference to get()) always see the current
+// values, including after a reload.
 public final class TimberConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path PATH = FabricLoader.getInstance().getConfigDir().resolve("timber.json");
@@ -61,7 +59,7 @@ public final class TimberConfig {
         return INSTANCE;
     }
 
-    /** Loads {@code config/timber.json} into the shared instance, then writes it back. */
+    // loads config/timber.json into the shared instance, then writes it back.
     public static void load() {
         if (Files.exists(PATH)) {
             try {
@@ -140,7 +138,7 @@ public final class TimberConfig {
         }
     }
 
-    /** Sets a key by name (command / ModMenu); returns false if unknown. */
+    // sets a key by name (command / ModMenu); returns false if unknown.
     public static boolean set(String key, String value) {
         TimberConfig c = INSTANCE;
         switch (key.toLowerCase()) {
@@ -177,7 +175,7 @@ public final class TimberConfig {
         return true;
     }
 
-    /** Reads a boolean key; the ModMenu screen uses this so key names stay in one place. */
+    // reads a boolean key; the ModMenu screen uses this so key names stay in one place.
     public static boolean getBool(String key) {
         TimberConfig c = INSTANCE;
         return switch (key.toLowerCase()) {
@@ -206,7 +204,7 @@ public final class TimberConfig {
         };
     }
 
-    /** Reads an integer key; the ModMenu screen uses this so key names stay in one place. */
+    // reads an integer key; the ModMenu screen uses this so key names stay in one place.
     public static int getInt(String key) {
         TimberConfig c = INSTANCE;
         return switch (key.toLowerCase()) {
@@ -255,7 +253,7 @@ public final class TimberConfig {
                 + ", min_leaves_found=" + minLeavesFound;
     }
 
-    /** JSON shape on disk; boxed so missing keys keep their defaults. */
+    // JSON shape on disk; boxed so missing keys keep their defaults.
     private static class Raw {
         Boolean standing;
         Boolean sneaking;
