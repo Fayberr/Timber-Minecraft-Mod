@@ -29,6 +29,7 @@ public final class TimberConfig {
     public boolean sneaking = false;
     public boolean chopTrees = true;
     public boolean chopFungi = false;
+    public boolean chopMushrooms = false;
     public boolean chopDown = false;
     public boolean destroyLeaves = true;
     public boolean plantSapling = false;
@@ -80,6 +81,7 @@ public final class TimberConfig {
         if (raw.sneaking != null) c.sneaking = raw.sneaking;
         if (raw.chop_trees != null) c.chopTrees = raw.chop_trees;
         if (raw.chop_fungi != null) c.chopFungi = raw.chop_fungi;
+        if (raw.chop_mushrooms != null) c.chopMushrooms = raw.chop_mushrooms;
         if (raw.chop_down != null) c.chopDown = raw.chop_down;
         if (raw.destroy_leaves != null) c.destroyLeaves = raw.destroy_leaves;
         if (raw.plant_sapling != null) c.plantSapling = raw.plant_sapling;
@@ -109,6 +111,7 @@ public final class TimberConfig {
         raw.sneaking = INSTANCE.sneaking;
         raw.chop_trees = INSTANCE.chopTrees;
         raw.chop_fungi = INSTANCE.chopFungi;
+        raw.chop_mushrooms = INSTANCE.chopMushrooms;
         raw.chop_down = INSTANCE.chopDown;
         raw.destroy_leaves = INSTANCE.destroyLeaves;
         raw.plant_sapling = INSTANCE.plantSapling;
@@ -146,6 +149,7 @@ public final class TimberConfig {
             case "sneaking" -> c.sneaking = parseBool(value);
             case "chop_trees" -> c.chopTrees = parseBool(value);
             case "chop_fungi" -> c.chopFungi = parseBool(value);
+            case "chop_mushrooms" -> c.chopMushrooms = parseBool(value);
             case "chop_down" -> c.chopDown = parseBool(value);
             case "destroy_leaves" -> c.destroyLeaves = parseBool(value);
             case "plant_sapling" -> c.plantSapling = parseBool(value);
@@ -183,6 +187,7 @@ public final class TimberConfig {
             case "sneaking" -> c.sneaking;
             case "chop_trees" -> c.chopTrees;
             case "chop_fungi" -> c.chopFungi;
+            case "chop_mushrooms" -> c.chopMushrooms;
             case "chop_down" -> c.chopDown;
             case "destroy_leaves" -> c.destroyLeaves;
             case "plant_sapling" -> c.plantSapling;
@@ -230,6 +235,7 @@ public final class TimberConfig {
                 + ", sneaking=" + sneaking
                 + ", chop_trees=" + chopTrees
                 + ", chop_fungi=" + chopFungi
+                + ", chop_mushrooms=" + chopMushrooms
                 + ", chop_down=" + chopDown
                 + ", destroy_leaves=" + destroyLeaves
                 + ", plant_sapling=" + plantSapling
@@ -259,6 +265,7 @@ public final class TimberConfig {
         Boolean sneaking;
         Boolean chop_trees;
         Boolean chop_fungi;
+        Boolean chop_mushrooms;
         Boolean chop_down;
         Boolean destroy_leaves;
         Boolean plant_sapling;

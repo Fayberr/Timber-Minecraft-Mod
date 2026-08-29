@@ -27,8 +27,10 @@ public final class TimberClothScreen {
                 "Chop trees while sneaking."));
         chopping.addEntry(bool(eb, "chop_trees", "Chop Trees", true,
                 "All kind of trees will get chopped."));
-        chopping.addEntry(bool(eb, "chop_fungi", "Chop Fungi", false,
-                "Huge fungi (nether trees) as well as huge mushrooms will get chopped."));
+        chopping.addEntry(bool(eb, "chop_fungi", "Chop Huge Fungi", false,
+                "Crimson and warped huge fungi (nether trees) will get chopped."));
+        chopping.addEntry(bool(eb, "chop_mushrooms", "Chop Giant Mushrooms", false,
+                "Giant brown and red mushrooms will get chopped."));
         chopping.addEntry(bool(eb, "chop_down", "Enable Chopping Down", false,
                 "Normally when you cut a tree in the middle only the top part gets destroyed. "
                         + "If enabled the bottom part gets destroyed as well."));
