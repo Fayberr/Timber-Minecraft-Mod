@@ -61,6 +61,13 @@ public class TreeFeller {
             new BlockPos(1, -1, 1), new BlockPos(1, -1, -1),
             new BlockPos(-1, -1, 1), new BlockPos(-1, -1, -1)
     };
+    // the 4 cardinal neighbours one block above a stem. a fungus's hat usually
+    // starts flaring outward right above the last stem block, so the topmost
+    // stem in a run peeks here too when counting caps for minLeavesFound.
+    private static final BlockPos[] TOP_CAP_OFFSETS = {
+            new BlockPos(1, 1, 0), new BlockPos(-1, 1, 0),
+            new BlockPos(0, 1, 1), new BlockPos(0, 1, -1)
+    };
 
     private final TimberConfig config;
     private final SlowChopManager slowChopManager;
@@ -288,6 +295,18 @@ public class TreeFeller {
                     leaves.add(p);
                 }
             }
+            // a stem with nothing continuing straight above it is the top of its
+            // run, so also peek at the 4 diagonally-up caps that start the hat.
+            // without this, fungi with a thin hat can undercount leaves and never
+            // clear minLeavesFound, so they never get chopped at all.
+            if (fungus && trunkKind(level.getBlockState(pos.offset(0, 1, 0))) != kind) {
+                for (BlockPos dir : TOP_CAP_OFFSETS) {
+                    BlockPos p = pos.offset(dir);
+                    if (isCapBlock(level.getBlockState(p), kind)) {
+                        leaves.add(p);
+                    }
+                }
+            }
 
             addNeighbours(level, pos, offsets, queue, kind);
             if (config.chopDown) {
@@ -374,7 +393,7 @@ public class TreeFeller {
         ArrayDeque<BlockPos> queue = new ArrayDeque<>();
 
         for (BlockPos log : logs) {
-            for (BlockPos dir : ORTHO) {
+            for (BlockPos dir : FLOOD_OFFSETS) {
                 BlockPos p = log.offset(dir);
                 if (isCapBlock(level.getBlockState(p), kind)) {
                     if (!distance.containsKey(p)) {
