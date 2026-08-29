@@ -470,24 +470,45 @@ public class TreeFeller {
         return 0;
     }
 
-    // if a cap touches a stem of the same kind that isn't part of this chop,
-    // protect all caps within 5 blocks of it so a neighbouring fungus/mushroom
-    // doesn't get dragged down too.
+    // if a cap touches a stem of the same kind that isn't part of this chop, it's
+    // sitting in the overlap between two fungi/mushrooms grown close together.
+    // give each contested cap to whichever stem is physically closer instead of
+    // protecting the whole neighbourhood: that way each tree clears its own hat
+    // the moment it's chopped instead of waiting on its neighbours, and a cap
+    // right on the boundary always ends up owned by exactly one of them instead
+    // of never getting claimed.
     private void protectOtherStems(ServerLevel level, Set<BlockPos> stems, Set<BlockPos> caps, TrunkKind kind) {
-        Set<BlockPos> protectedCaps = new HashSet<>();
+        Set<BlockPos> otherStems = new HashSet<>();
         for (BlockPos cap : caps) {
             for (BlockPos dir : ORTHO) {
                 BlockPos np = cap.offset(dir);
                 if (trunkKind(level.getBlockState(np)) == kind && !stems.contains(np)) {
-                    for (BlockPos c : caps) {
-                        if (c.distSqr(np) <= 25.0) {
-                            protectedCaps.add(c);
-                        }
-                    }
+                    otherStems.add(np);
                 }
             }
         }
-        caps.removeAll(protectedCaps);
+        if (otherStems.isEmpty()) {
+            return;
+        }
+
+        Set<BlockPos> notOurs = new HashSet<>();
+        for (BlockPos cap : caps) {
+            if (nearestDistSqr(cap, otherStems) < nearestDistSqr(cap, stems)) {
+                notOurs.add(cap);
+            }
+        }
+        caps.removeAll(notOurs);
+    }
+
+    private static double nearestDistSqr(BlockPos from, Collection<BlockPos> to) {
+        double best = Double.MAX_VALUE;
+        for (BlockPos p : to) {
+            double d = p.distSqr(from);
+            if (d < best) {
+                best = d;
+            }
+        }
+        return best;
     }
 
     // ------------------------------------------------------------------
