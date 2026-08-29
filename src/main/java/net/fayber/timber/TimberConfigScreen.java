@@ -42,6 +42,7 @@ public class TimberConfigScreen extends Screen {
                 y = addBool("sneaking", "Chop While Sneaking", centerX, y);
                 y = addBool("chop_trees", "Chop Trees", centerX, y);
                 y = addBool("chop_fungi", "Chop Giant Fungi", centerX, y);
+                y = addBool("chop_mushrooms", "Chop Giant Mushrooms", centerX, y);
                 y = addBool("chop_down", "Chop Downwards", centerX, y);
                 y = addBool("destroy_leaves", "Destroy Leaves", centerX, y);
                 y = addBool("plant_sapling", "Plant Sapling", centerX, y);

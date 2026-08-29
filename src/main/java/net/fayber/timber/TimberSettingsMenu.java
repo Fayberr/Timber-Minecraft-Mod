@@ -42,7 +42,7 @@ public final class TimberSettingsMenu {
     private static int pageOf(String key) {
         return switch (key.toLowerCase()) {
             case "wooden_axe", "stone_axe", "copper_axe", "iron_axe", "golden_axe",
-                 "diamond_axe", "netherite_axe", "chop_trees", "chop_fungi" -> 2;
+                 "diamond_axe", "netherite_axe", "chop_trees", "chop_fungi", "chop_mushrooms" -> 2;
             default -> 1;
         };
     }
@@ -112,8 +112,10 @@ public final class TimberSettingsMenu {
         booleanLine(player, "diamond_axe", "Enable Diamond Axe", null);
         booleanLine(player, "netherite_axe", "Enable Netherite Axe", null);
         booleanLine(player, "chop_trees", "Chop Trees", "All kind of trees will get chopped.");
-        booleanLine(player, "chop_fungi", "Chop Fungi",
-                "Huge fungi (nether trees) as well as huge mushrooms will get chopped.");
+        booleanLine(player, "chop_fungi", "Chop Huge Fungi",
+                "Crimson and warped huge fungi (nether trees) will get chopped.");
+        booleanLine(player, "chop_mushrooms", "Chop Giant Mushrooms",
+                "Giant brown and red mushrooms will get chopped.");
         intLine(player, "blocks_per_chop", "Set Amount of Destroyed Blocks per Chop", "Default: 1");
         intLine(player, "time_between_chops", "Set Time in Ticks Between Chops", "Default: 1");
         intLine(player, "max_tree_size", "Set Max. Tree Size",

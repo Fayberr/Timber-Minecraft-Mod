@@ -5,6 +5,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -12,6 +13,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -39,7 +41,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-// core timber logic: one log breaks, the whole tree (or giant fungus) goes down.
+// core timber logic: one log/stem breaks, the whole tree, huge fungus or giant
+// mushroom goes down.
 public class TreeFeller {
 
     // 6 orthogonal directions.
@@ -123,11 +126,15 @@ public class TreeFeller {
             return true;
         }
 
-        if (config.chopTrees && isLogBlock(state)) {
-            return chop(serverLevel, serverPlayer, pos, stack, false);
+        TrunkKind kind = trunkKind(state);
+        if (kind == TrunkKind.TREE && config.chopTrees) {
+            return chop(serverLevel, serverPlayer, pos, stack, kind);
         }
-        if (config.chopFungi && isStemBlock(state)) {
-            return chop(serverLevel, serverPlayer, pos, stack, true);
+        if (kind == TrunkKind.FUNGUS && config.chopFungi) {
+            return chop(serverLevel, serverPlayer, pos, stack, kind);
+        }
+        if (kind == TrunkKind.MUSHROOM && config.chopMushrooms) {
+            return chop(serverLevel, serverPlayer, pos, stack, kind);
         }
         return true;
     }
@@ -136,12 +143,36 @@ public class TreeFeller {
     // Block classification
     // ------------------------------------------------------------------
 
-    private boolean isLogBlock(BlockState state) {
-        return state.getBlock().builtInRegistryHolder().is(BlockTags.LOGS);
-    }
+    // three kinds of trunk block, each with its own config toggle. `#minecraft:logs`
+    // is a superset that also contains crimson/warped stems, so trees need the
+    // narrower `logs_that_burn` tag or a crimson/warped stem would always match the
+    // tree branch first and never reach the fungus/mushroom logic below.
+    //
+    // looked up by id instead of the BlockTags constants since some Minecraft
+    // versions don't expose these three as Java fields even though the tag data
+    // itself is still there.
+    private static final TagKey<Block> LOGS_THAT_BURN =
+            TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("minecraft", "logs_that_burn"));
+    private static final TagKey<Block> CRIMSON_STEMS =
+            TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("minecraft", "crimson_stems"));
+    private static final TagKey<Block> WARPED_STEMS =
+            TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("minecraft", "warped_stems"));
 
-    private boolean isStemBlock(BlockState state) {
-        return isLogBlock(state) || state.getBlock() == Blocks.MUSHROOM_STEM;
+    private enum TrunkKind { TREE, FUNGUS, MUSHROOM }
+
+    private TrunkKind trunkKind(BlockState state) {
+        Block block = state.getBlock();
+        if (block.builtInRegistryHolder().is(LOGS_THAT_BURN)) {
+            return TrunkKind.TREE;
+        }
+        if (block.builtInRegistryHolder().is(CRIMSON_STEMS)
+                || block.builtInRegistryHolder().is(WARPED_STEMS)) {
+            return TrunkKind.FUNGUS;
+        }
+        if (block == Blocks.MUSHROOM_STEM) {
+            return TrunkKind.MUSHROOM;
+        }
+        return null;
     }
 
     private boolean isLeafBlock(BlockState state) {
@@ -157,12 +188,15 @@ public class TreeFeller {
         return true;
     }
 
-    private boolean isCapBlock(BlockState state) {
+    // mushroom stems cap with mushroom blocks; crimson/warped stems cap with
+    // wart blocks and shroomlight. kept apart so a mushroom cap never counts
+    // toward a fungus chop or vice versa.
+    private boolean isCapBlock(BlockState state, TrunkKind kind) {
         Block block = state.getBlock();
-        return block.builtInRegistryHolder().is(BlockTags.WART_BLOCKS)
-                || block == Blocks.SHROOMLIGHT
-                || block == Blocks.BROWN_MUSHROOM_BLOCK
-                || block == Blocks.RED_MUSHROOM_BLOCK;
+        if (kind == TrunkKind.MUSHROOM) {
+            return block == Blocks.BROWN_MUSHROOM_BLOCK || block == Blocks.RED_MUSHROOM_BLOCK;
+        }
+        return block.builtInRegistryHolder().is(BlockTags.WART_BLOCKS) || block == Blocks.SHROOMLIGHT;
     }
 
     private boolean isAxeEnabled(ItemStack stack) {
@@ -195,7 +229,8 @@ public class TreeFeller {
     // Main chop
     // ------------------------------------------------------------------
 
-    private boolean chop(ServerLevel level, ServerPlayer player, BlockPos origin, ItemStack stack, boolean fungus) {
+    private boolean chop(ServerLevel level, ServerPlayer player, BlockPos origin, ItemStack stack, TrunkKind kind) {
+        boolean fungus = kind != TrunkKind.TREE;
         int maxTreeSize = config.maxTreeSize;
         Set<BlockPos> logs = new LinkedHashSet<>();
         Set<BlockPos> leaves = new LinkedHashSet<>();
@@ -217,15 +252,15 @@ public class TreeFeller {
 
         // Seed the scan from the broken block. With direct-to-inventory we cancel
         // the vanilla break, so the origin is still a log here and gets collected below.
-        addNeighbours(level, origin, offsets, queue, fungus);
+        addNeighbours(level, origin, offsets, queue, kind);
         if (config.chopDown) {
-            addNeighbours(level, origin, downOffsets, queue, fungus);
+            addNeighbours(level, origin, downOffsets, queue, kind);
         }
 
         while (!queue.isEmpty() && !exhausted && logs.size() < maxTreeSize) {
             BlockPos pos = queue.poll();
             BlockState state = level.getBlockState(pos);
-            if (fungus ? !isStemBlock(state) : !isLogBlock(state)) {
+            if (trunkKind(state) != kind) {
                 continue;
             }
             if (logs.contains(pos)) {
@@ -249,14 +284,14 @@ public class TreeFeller {
             for (BlockPos dir : ORTHO) {
                 BlockPos p = pos.offset(dir);
                 BlockState s = level.getBlockState(p);
-                if (fungus ? isCapBlock(s) : isLeafBlock(s)) {
+                if (fungus ? isCapBlock(s, kind) : isLeafBlock(s)) {
                     leaves.add(p);
                 }
             }
 
-            addNeighbours(level, pos, offsets, queue, fungus);
+            addNeighbours(level, pos, offsets, queue, kind);
             if (config.chopDown) {
-                addNeighbours(level, pos, downOffsets, queue, fungus);
+                addNeighbours(level, pos, downOffsets, queue, kind);
             }
         }
 
@@ -274,8 +309,8 @@ public class TreeFeller {
         }
         toDestroy.addAll(logs);
         if (fungus) {
-            Set<BlockPos> caps = flood(level, logs, true);
-            protectOtherStems(level, logs, caps);
+            Set<BlockPos> caps = flood(level, logs, kind);
+            protectOtherStems(level, logs, caps, kind);
             toDestroy.addAll(caps);
         } else if (config.destroyLeaves) {
             toDestroy.addAll(collectTreeLeaves(level, logs));
@@ -323,18 +358,17 @@ public class TreeFeller {
     // Neighbour scanning / flooding
     // ------------------------------------------------------------------
 
-    private void addNeighbours(ServerLevel level, BlockPos pos, BlockPos[] offsets, ArrayDeque<BlockPos> queue, boolean fungus) {
+    private void addNeighbours(ServerLevel level, BlockPos pos, BlockPos[] offsets, ArrayDeque<BlockPos> queue, TrunkKind kind) {
         for (BlockPos rel : offsets) {
             BlockPos p = pos.offset(rel);
-            BlockState s = level.getBlockState(p);
-            if (fungus ? isStemBlock(s) : isLogBlock(s)) {
+            if (trunkKind(level.getBlockState(p)) == kind) {
                 queue.add(p);
             }
         }
     }
 
-    // multi-source flood from the logs to collect connected fungus caps.
-    private Set<BlockPos> flood(ServerLevel level, Collection<BlockPos> logs, boolean fungus) {
+    // multi-source flood from the logs to collect connected fungus/mushroom caps.
+    private Set<BlockPos> flood(ServerLevel level, Collection<BlockPos> logs, TrunkKind kind) {
         Set<BlockPos> result = new LinkedHashSet<>();
         Map<BlockPos, Integer> distance = new HashMap<>();
         ArrayDeque<BlockPos> queue = new ArrayDeque<>();
@@ -342,7 +376,7 @@ public class TreeFeller {
         for (BlockPos log : logs) {
             for (BlockPos dir : ORTHO) {
                 BlockPos p = log.offset(dir);
-                if (fungus ? isCapBlock(level.getBlockState(p)) : isLeafBlock(level.getBlockState(p))) {
+                if (isCapBlock(level.getBlockState(p), kind)) {
                     if (!distance.containsKey(p)) {
                         distance.put(p, 1);
                         queue.add(p);
@@ -363,7 +397,7 @@ public class TreeFeller {
             }
             for (BlockPos rel : FLOOD_OFFSETS) {
                 BlockPos np = p.offset(rel);
-                if (fungus ? isCapBlock(level.getBlockState(np)) : isLeafBlock(level.getBlockState(np))) {
+                if (isCapBlock(level.getBlockState(np), kind)) {
                     if (!distance.containsKey(np)) {
                         distance.put(np, d + 1);
                         queue.add(np);
@@ -417,13 +451,15 @@ public class TreeFeller {
         return 0;
     }
 
-    // if a cap touches a stem that isn't part of this chop, protect all caps within 5 blocks of it
-    private void protectOtherStems(ServerLevel level, Set<BlockPos> stems, Set<BlockPos> caps) {
+    // if a cap touches a stem of the same kind that isn't part of this chop,
+    // protect all caps within 5 blocks of it so a neighbouring fungus/mushroom
+    // doesn't get dragged down too.
+    private void protectOtherStems(ServerLevel level, Set<BlockPos> stems, Set<BlockPos> caps, TrunkKind kind) {
         Set<BlockPos> protectedCaps = new HashSet<>();
         for (BlockPos cap : caps) {
             for (BlockPos dir : ORTHO) {
                 BlockPos np = cap.offset(dir);
-                if (isStemBlock(level.getBlockState(np)) && !stems.contains(np)) {
+                if (trunkKind(level.getBlockState(np)) == kind && !stems.contains(np)) {
                     for (BlockPos c : caps) {
                         if (c.distSqr(np) <= 25.0) {
                             protectedCaps.add(c);
