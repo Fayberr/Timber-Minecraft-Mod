@@ -4,13 +4,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -357,11 +354,6 @@ public class TreeFeller {
             player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 20, amplifier, false, false, true));
         }
 
-        // Silence the multi-block break noise.
-        if (config.stopSound) {
-            stopBreakSounds(level, origin);
-        }
-
         // Autoplant.
         if (config.plantSapling) {
             autoPlanter.schedule(level, origin);
@@ -542,29 +534,6 @@ public class TreeFeller {
     private void breakAxe(ServerPlayer player) {
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         player.playSound(SoundEvents.ITEM_BREAK.value(), 1.0F, 1.0F);
-    }
-
-    // ------------------------------------------------------------------
-    // Stop-sound
-    // ------------------------------------------------------------------
-
-    private void stopBreakSounds(ServerLevel level, BlockPos origin) {
-        SoundEvent[] sounds = {
-                SoundEvents.GRASS_BREAK,
-                SoundEvents.WOOD_BREAK,
-                SoundEvents.WART_BLOCK_BREAK,
-                SoundEvents.SHROOMLIGHT_BREAK,
-                SoundEvents.NETHER_WART_BREAK,
-                SoundEvents.STEM_BREAK
-        };
-        for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
-            if (player.level() != level || player.blockPosition().distSqr(origin) > 400.0) {
-                continue;
-            }
-            for (SoundEvent sound : sounds) {
-                player.connection.send(new ClientboundStopSoundPacket(sound.location(), SoundSource.BLOCKS));
-            }
-        }
     }
 
     // ------------------------------------------------------------------

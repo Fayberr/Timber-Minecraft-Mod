@@ -53,7 +53,7 @@ public class TimberConfigScreen extends Screen {
                 y = addBool("wear_out", "Wear Out Axe", centerX, y);
                 y = addBool("drop_loot", "Loot to Inventory", centerX, y);
                 y = addBool("hunger", "Apply Hunger", centerX, y);
-                y = addBool("stop_sound", "Silence Break Sounds", centerX, y);
+                y = addBool("suppress_break_effects", "Suppress Felling Effects", centerX, y);
                 y = addBool("persistent", "Chop Persistent Leaves", centerX, y);
             }
             case 2 -> {
