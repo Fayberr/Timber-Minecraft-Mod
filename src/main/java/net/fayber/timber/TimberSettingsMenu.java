@@ -97,8 +97,8 @@ public final class TimberSettingsMenu {
                 "Teleports the tree's drops straight into your inventory. Overflow drops on the ground.");
         booleanLine(player, "hunger", "Give Additional Hunger Effect",
                 "Gives a hunger effect for 1 second at the same level as the tree size.");
-        booleanLine(player, "stop_sound", "Stop Loud Breaking Noises",
-                "Suppresses loud breaking noises when chopping a tree.");
+        booleanLine(player, "suppress_break_effects", "Suppress Felling Effects",
+                "Suppresses particles and sounds from Timber-felled blocks, including slow chopping.");
         booleanLine(player, "persistent", "Destroy Player-Placed Trees",
                 "Also destroys player-placed trees (persistent leaves). Use with care.");
     }

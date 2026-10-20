@@ -51,8 +51,8 @@ public final class TimberClothScreen {
                 "Teleports the tree's drops straight into your inventory. Overflow drops on the ground."));
         effects.addEntry(bool(eb, "hunger", "Give Additional Hunger Effect", false,
                 "Gives a hunger effect for 1 second at the same level as the tree size."));
-        effects.addEntry(bool(eb, "stop_sound", "Stop Loud Breaking Noises", false,
-                "Suppresses loud breaking noises when chopping a tree."));
+        effects.addEntry(bool(eb, "suppress_break_effects", "Suppress Felling Effects", true,
+                "Suppresses particles and sounds from Timber-felled blocks, including slow chopping."));
         effects.addEntry(bool(eb, "persistent", "Destroy Player-Placed Trees", false,
                 "Also destroys player-placed trees (persistent leaves). Use with care."));
 
