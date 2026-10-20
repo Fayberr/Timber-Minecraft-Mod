@@ -4,7 +4,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -91,9 +90,10 @@ public class SlowChopManager {
             }
         }
 
-        // Break particles + sound for everyone nearby.
-        level.levelEvent(null, LevelEvent.PARTICLES_DESTROY_BLOCK, pos, Block.getId(state));
-        level.playSound(null, pos, state.getSoundType().getBreakSound(), SoundSource.BLOCKS, 1.0F, 0.8F);
+        // The vanilla break event already includes the block sound.
+        if (!config.suppressBreakEffects) {
+            level.levelEvent(null, LevelEvent.PARTICLES_DESTROY_BLOCK, pos, Block.getId(state));
+        }
 
         // Replace with air.
         level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
