@@ -146,9 +146,7 @@ public class TreeFeller {
         return true;
     }
 
-    // ------------------------------------------------------------------
     // Block classification
-    // ------------------------------------------------------------------
 
     // three kinds of trunk block, each with its own config toggle. `#minecraft:logs`
     // is a superset that also contains crimson/warped stems, so trees need the
@@ -231,9 +229,7 @@ public class TreeFeller {
         return false;
     }
 
-    // ------------------------------------------------------------------
     // Main chop
-    // ------------------------------------------------------------------
 
     private boolean chop(ServerLevel level, ServerPlayer player, BlockPos origin, ItemStack stack, TrunkKind kind) {
         boolean fungus = kind != TrunkKind.TREE;
@@ -369,9 +365,7 @@ public class TreeFeller {
         return !collectOrigin;
     }
 
-    // ------------------------------------------------------------------
     // Neighbour scanning / flooding
-    // ------------------------------------------------------------------
 
     private void addNeighbours(ServerLevel level, BlockPos pos, BlockPos[] offsets, ArrayDeque<BlockPos> queue, TrunkKind kind) {
         for (BlockPos rel : offsets) {
@@ -510,9 +504,7 @@ public class TreeFeller {
         return best;
     }
 
-    // ------------------------------------------------------------------
     // Axe durability helpers
-    // ------------------------------------------------------------------
 
     private boolean isUnbreakable(ItemStack stack) {
         return stack.get(DataComponents.UNBREAKABLE) != null;
@@ -543,9 +535,7 @@ public class TreeFeller {
         player.playSound(SoundEvents.ITEM_BREAK.value(), 1.0F, 1.0F);
     }
 
-    // ------------------------------------------------------------------
     // Offset tables
-    // ------------------------------------------------------------------
 
     private static BlockPos[] buildLogOffsets(boolean fungus) {
         List<BlockPos> list = new ArrayList<>();
