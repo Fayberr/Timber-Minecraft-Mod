@@ -67,3 +67,12 @@ publishing {
 // Mode selection and migration run without a Minecraft client or server.
 dependencies { testImplementation 'junit:junit:4.13.2' }
 test { useJUnit() }
+
+fabricApi {
+    configureTests {
+        createSourceSet = true
+        modId = "timber-test"
+        enableGameTests = true
+        eula = true
+    }
+}
