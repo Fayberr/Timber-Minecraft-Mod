@@ -87,3 +87,5 @@ The jar is in `build/libs/`.
 GPL-3.0-or-later
 
 Tune the count live with `/timber config set minimized_particles 4`. Changes are saved and apply to the next felled block, including queued slow chops.
+
+Vines that lose support during a Timber chop use the same felling effect mode and minimized particle count. Vanilla still decides which vines fall and what they drop; vines with another support remain. This includes the manually mined log and slow chopping. Other vine breaks keep their normal effects.

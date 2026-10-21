@@ -317,6 +317,8 @@ public class TreeFeller {
             return true;
         }
 
+        FellingEffectsScope.activate(level, config.fellingEffects, config.minimizedParticles);
+
         // Determine the full block set to destroy. The origin goes first so the
         // block the player broke disappears immediately even during slow chop.
         Set<BlockPos> toDestroy = new LinkedHashSet<>();
