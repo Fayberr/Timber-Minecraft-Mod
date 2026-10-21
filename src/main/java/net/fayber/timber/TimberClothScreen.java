@@ -51,11 +51,11 @@ public final class TimberClothScreen {
                 "Teleports the tree's drops straight into your inventory. Overflow drops on the ground."));
         effects.addEntry(bool(eb, "hunger", "Give Additional Hunger Effect", false,
                 "Gives a hunger effect for 1 second at the same level as the tree size."));
-        var fellingEffects = eb.startEnumSelector(Component.literal("Felling Effects"),
+        var fellingEffects = eb.startEnumSelector(Component.literal("Particle Amount"),
                         FellingEffects.class, TimberConfig.get().fellingEffects)
                 .setDefaultValue(FellingEffects.MINIMIZED)
                 .setEnumNameProvider(value -> Component.literal(((FellingEffects) value).label()))
-                .setTooltip(Component.literal("Unsuppressed: full particles and sounds. Minimized: adjustable particles per block, no extra sounds. Suppressed: no felling effects."))
+                .setTooltip(Component.literal("Full: full particles and sounds. Less: adjustable particles per block, no extra sounds. None: no felling effects."))
                 .setSaveConsumer(value -> TimberConfig.set("felling_effects", value.key()))
                 .build();
         effects.addEntry(fellingEffects);

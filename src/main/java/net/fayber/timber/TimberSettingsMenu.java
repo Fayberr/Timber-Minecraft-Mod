@@ -99,9 +99,9 @@ public final class TimberSettingsMenu {
                 "Teleports the tree's drops straight into your inventory. Overflow drops on the ground.");
         booleanLine(player, "hunger", "Give Additional Hunger Effect",
                 "Gives a hunger effect for 1 second at the same level as the tree size.");
-        player.sendSystemMessage(Component.literal("[ " + TimberConfig.get().fellingEffects.label() + " ] Felling Effects")
+        player.sendSystemMessage(Component.literal("[ " + TimberConfig.get().fellingEffects.label() + " ] Particle Amount")
                 .withStyle(style(ChatFormatting.GOLD, "felling_effects",
-                        "Cycle: Unsuppressed, Minimized, Suppressed. Minimized shows adjustable particles per block without extra sounds.")));
+                        "Cycle: Full, Less, None. Less shows adjustable particles per block without extra sounds.")));
         if (TimberConfig.get().fellingEffects == FellingEffects.MINIMIZED) {
             intLine(player, "minimized_particles", "Particles Per Block", "Range: 1 to 64. Default: 2.");
         }
