@@ -1,6 +1,8 @@
 package net.fayber.timber;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -91,8 +93,12 @@ public class SlowChopManager {
         }
 
         // The vanilla break event already includes the block sound.
-        if (!config.suppressBreakEffects) {
+        if (config.fellingEffects == FellingEffects.UNSUPPRESSED) {
             level.levelEvent(null, LevelEvent.PARTICLES_DESTROY_BLOCK, pos, Block.getId(state));
+        } else if (config.fellingEffects == FellingEffects.MINIMIZED) {
+            level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state),
+                    pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                    2, 0.25, 0.25, 0.25, 0.05);
         }
 
         // Replace with air.

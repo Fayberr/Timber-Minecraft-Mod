@@ -27,7 +27,9 @@ public final class TimberSettingsMenu {
 
     // flips a boolean setting and re-opens the menu on that setting's page.
     public static boolean toggle(ServerPlayer player, String key) {
-        String value = String.valueOf(!TimberConfig.getBool(key));
+        String value = key.equalsIgnoreCase("felling_effects")
+                ? TimberConfig.get().fellingEffects.next().key()
+                : String.valueOf(!TimberConfig.getBool(key));
         try {
             if (!TimberConfig.set(key, value)) {
                 return false;
@@ -97,8 +99,9 @@ public final class TimberSettingsMenu {
                 "Teleports the tree's drops straight into your inventory. Overflow drops on the ground.");
         booleanLine(player, "hunger", "Give Additional Hunger Effect",
                 "Gives a hunger effect for 1 second at the same level as the tree size.");
-        booleanLine(player, "suppress_break_effects", "Suppress Felling Effects",
-                "Suppresses particles and sounds from Timber-felled blocks, including slow chopping.");
+        player.sendSystemMessage(Component.literal("[ " + TimberConfig.get().fellingEffects.label() + " ] Felling Effects")
+                .withStyle(style(ChatFormatting.GOLD, "felling_effects",
+                        "Cycle: Unsuppressed, Minimized, Suppressed. Minimized shows two particles per block without extra sounds.")));
         booleanLine(player, "persistent", "Destroy Player-Placed Trees",
                 "Also destroys player-placed trees (persistent leaves). Use with care.");
     }

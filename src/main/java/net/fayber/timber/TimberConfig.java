@@ -38,7 +38,7 @@ public final class TimberConfig {
     public boolean wearOut = true;
     public boolean dropLoot = false;
     public boolean hunger = false;
-    public boolean suppressBreakEffects = true;
+    public FellingEffects fellingEffects = FellingEffects.MINIMIZED;
     public boolean persistent = false;
 
     // Which axes may fell.
@@ -90,7 +90,7 @@ public final class TimberConfig {
         if (raw.wear_out != null) c.wearOut = raw.wear_out;
         if (raw.drop_loot != null) c.dropLoot = raw.drop_loot;
         if (raw.hunger != null) c.hunger = raw.hunger;
-        if (raw.suppress_break_effects != null) c.suppressBreakEffects = raw.suppress_break_effects;
+        c.fellingEffects = FellingEffects.resolve(raw.felling_effects, raw.suppress_break_effects);
         if (raw.persistent != null) c.persistent = raw.persistent;
         if (raw.wooden_axe != null) c.woodenAxe = raw.wooden_axe;
         if (raw.stone_axe != null) c.stoneAxe = raw.stone_axe;
@@ -120,7 +120,7 @@ public final class TimberConfig {
         raw.wear_out = INSTANCE.wearOut;
         raw.drop_loot = INSTANCE.dropLoot;
         raw.hunger = INSTANCE.hunger;
-        raw.suppress_break_effects = INSTANCE.suppressBreakEffects;
+        raw.felling_effects = INSTANCE.fellingEffects.key();
         raw.persistent = INSTANCE.persistent;
         raw.wooden_axe = INSTANCE.woodenAxe;
         raw.stone_axe = INSTANCE.stoneAxe;
@@ -158,7 +158,9 @@ public final class TimberConfig {
             case "wear_out" -> c.wearOut = parseBool(value);
             case "drop_loot" -> c.dropLoot = parseBool(value);
             case "hunger" -> c.hunger = parseBool(value);
-            case "suppress_break_effects", "stop_sound" -> c.suppressBreakEffects = parseBool(value);
+            case "felling_effects" -> c.fellingEffects = FellingEffects.parse(value);
+            case "suppress_break_effects", "stop_sound" -> c.fellingEffects =
+                    parseBool(value) ? FellingEffects.SUPPRESSED : FellingEffects.UNSUPPRESSED;
             case "persistent" -> c.persistent = parseBool(value);
             case "wooden_axe" -> c.woodenAxe = parseBool(value);
             case "stone_axe" -> c.stoneAxe = parseBool(value);
@@ -196,7 +198,7 @@ public final class TimberConfig {
             case "wear_out" -> c.wearOut;
             case "drop_loot" -> c.dropLoot;
             case "hunger" -> c.hunger;
-            case "suppress_break_effects", "stop_sound" -> c.suppressBreakEffects;
+            case "suppress_break_effects", "stop_sound" -> c.fellingEffects == FellingEffects.SUPPRESSED;
             case "persistent" -> c.persistent;
             case "wooden_axe" -> c.woodenAxe;
             case "stone_axe" -> c.stoneAxe;
@@ -244,7 +246,7 @@ public final class TimberConfig {
                 + ", wear_out=" + wearOut
                 + ", drop_loot=" + dropLoot
                 + ", hunger=" + hunger
-                + ", suppress_break_effects=" + suppressBreakEffects
+                + ", felling_effects=" + fellingEffects.key()
                 + ", persistent=" + persistent
                 + ", wooden_axe=" + woodenAxe
                 + ", stone_axe=" + stoneAxe
@@ -274,6 +276,7 @@ public final class TimberConfig {
         Boolean wear_out;
         Boolean drop_loot;
         Boolean hunger;
+        String felling_effects;
         Boolean suppress_break_effects;
         Boolean persistent;
         Boolean wooden_axe;

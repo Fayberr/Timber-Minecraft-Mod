@@ -143,8 +143,10 @@ public class TimberMod implements ModInitializer {
                         + " to " + value + ". New config: " + TimberConfig.get()), true);
                 return 1;
             }
-        } catch (NumberFormatException e) {
-            source.sendFailure(Component.literal("[Timber] " + key + " expects a number."));
+        } catch (IllegalArgumentException e) {
+            source.sendFailure(Component.literal(key.equalsIgnoreCase("felling_effects")
+                    ? "[Timber] felling_effects expects unsuppressed, minimized, or suppressed."
+                    : "[Timber] " + key + " expects a number."));
             return 0;
         }
         source.sendFailure(Component.literal("[Timber] Unknown config key '" + key

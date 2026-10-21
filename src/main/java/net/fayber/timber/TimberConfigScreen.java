@@ -53,7 +53,7 @@ public class TimberConfigScreen extends Screen {
                 y = addBool("wear_out", "Wear Out Axe", centerX, y);
                 y = addBool("drop_loot", "Loot to Inventory", centerX, y);
                 y = addBool("hunger", "Apply Hunger", centerX, y);
-                y = addBool("suppress_break_effects", "Suppress Felling Effects", centerX, y);
+                y = addEffectsCycle(centerX, y);
                 y = addBool("persistent", "Chop Persistent Leaves", centerX, y);
             }
             case 2 -> {
@@ -92,6 +92,18 @@ public class TimberConfigScreen extends Screen {
                     .bounds(centerX + 55, this.height - 30, 100, 20)
                     .build());
         }
+    }
+
+    private int addEffectsCycle(int centerX, int y) {
+        this.addRenderableWidget(Button.builder(effectsText(), button -> {
+            TimberConfig.set("felling_effects", TimberConfig.get().fellingEffects.next().key());
+            button.setMessage(effectsText());
+        }).bounds(centerX - 100, y, 200, 20).build());
+        return y + SPACING;
+    }
+
+    private static Component effectsText() {
+        return Component.literal("Felling Effects: " + TimberConfig.get().fellingEffects.label());
     }
 
     // a toggle that flips the named boolean config key and saves it.
