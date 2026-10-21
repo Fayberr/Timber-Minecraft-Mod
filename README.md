@@ -40,7 +40,8 @@ built-in screen is used instead.
 | `wear_out` | true | Axes lose one durability point per chopped log. |
 | `drop_loot` | false | False drops items at the block, true gives them to your inventory. |
 | `hunger` | false | Apply hunger scaled to the tree size. |
-| `felling_effects` | minimized | Cycle through unsuppressed (full particles and sounds), minimized (two particles per block, no extra sounds), and suppressed (no felling effects). Applies to instant and slow chopping. |
+| `minimized_particles` | 2 | Particles per block in minimized mode (1 to 64). The slider appears below Felling Effects only when Minimized is selected. |
+| `felling_effects` | minimized | Cycle through unsuppressed (full particles and sounds), minimized (adjustable particles per block, no extra sounds), and suppressed (no felling effects). Applies to instant and slow chopping. |
 | `persistent` | false | Also chop persistent (placed) leaves. |
 | `wooden_axe` | true | Wooden axes may fell trees. |
 | `stone_axe` | true | Stone axes may fell trees. |
@@ -84,3 +85,5 @@ The jar is in `build/libs/`.
 ## License
 
 GPL-3.0-or-later
+
+Tune the count live with `/timber config set minimized_particles 4`. Changes are saved and apply to the next felled block, including queued slow chops.

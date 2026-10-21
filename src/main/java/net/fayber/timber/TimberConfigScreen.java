@@ -54,6 +54,10 @@ public class TimberConfigScreen extends Screen {
                 y = addBool("drop_loot", "Loot to Inventory", centerX, y);
                 y = addBool("hunger", "Apply Hunger", centerX, y);
                 y = addEffectsCycle(centerX, y);
+                if (TimberConfig.get().fellingEffects == FellingEffects.MINIMIZED) {
+                    addSlider(new SliderSpec("minimized_particles", "Particles Per Block", 1, 64), centerX, y);
+                    y += SPACING;
+                }
                 y = addBool("persistent", "Chop Persistent Leaves", centerX, y);
             }
             case 2 -> {
@@ -97,7 +101,7 @@ public class TimberConfigScreen extends Screen {
     private int addEffectsCycle(int centerX, int y) {
         this.addRenderableWidget(Button.builder(effectsText(), button -> {
             TimberConfig.set("felling_effects", TimberConfig.get().fellingEffects.next().key());
-            button.setMessage(effectsText());
+            this.rebuildWidgets();
         }).bounds(centerX - 100, y, 200, 20).build());
         return y + SPACING;
     }

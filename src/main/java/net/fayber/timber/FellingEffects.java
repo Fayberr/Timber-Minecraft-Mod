@@ -15,6 +15,11 @@ public enum FellingEffects {
 
     public FellingEffects next() { return values()[(ordinal() + 1) % values().length]; }
 
+    public static int particleCount(int count) {
+        if (count < 1 || count > 64) throw new IllegalArgumentException("Particle count must be between 1 and 64");
+        return count;
+    }
+
     public static FellingEffects parse(String value) {
         return valueOf(value.toUpperCase(Locale.ROOT));
     }
