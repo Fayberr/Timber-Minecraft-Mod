@@ -40,7 +40,7 @@ built-in screen is used instead.
 | `wear_out` | true | Axes lose one durability point per chopped log. |
 | `drop_loot` | false | False drops items at the block, true gives them to your inventory. |
 | `hunger` | false | Apply hunger scaled to the tree size. |
-| `minimized_particles` | 2 | Particles per block in minimized mode (1 to 64). The slider appears below Felling Effects only when Minimized is selected. |
+| `minimized_particles` | 2 | Particles per block in minimized mode (1 to 64). The slider appears below Particle Amount only when Less is selected. |
 | `felling_effects` | minimized | Cycle through unsuppressed (full particles and sounds), minimized (adjustable particles per block, no extra sounds), and suppressed (no felling effects). Applies to instant and slow chopping. |
 | `persistent` | false | Also chop persistent (placed) leaves. |
 | `wooden_axe` | true | Wooden axes may fell trees. |
@@ -55,7 +55,7 @@ built-in screen is used instead.
 | `max_tree_size` | 555 | Maximum number of logs counted as one tree. |
 | `min_leaves_found` | 5 | Minimum leaves attached before a tree is felled. |
 
-The Effects setting cycles through Unsuppressed, Minimized, and Suppressed. The manually mined block keeps its normal effects. Existing `suppress_break_effects` values migrate to suppressed or unsuppressed; new configs default to minimized. Legacy `suppress_break_effects` and `stop_sound` boolean command keys still work. Use `/timber config set felling_effects minimized` to select the reduced effect.
+The Particle Amount setting cycles through Full, Less, and None. These labels retain the existing `unsuppressed`, `minimized`, and `suppressed` config values. The manually mined block keeps its normal effects. Existing `suppress_break_effects` values migrate to suppressed or unsuppressed; new configs default to minimized. Legacy `suppress_break_effects` and `stop_sound` boolean command keys still work. Use `/timber config set felling_effects minimized` to select the reduced effect.
 
 ## Details
 

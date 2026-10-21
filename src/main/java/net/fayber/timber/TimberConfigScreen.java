@@ -107,7 +107,7 @@ public class TimberConfigScreen extends Screen {
     }
 
     private static Component effectsText() {
-        return Component.literal("Felling Effects: " + TimberConfig.get().fellingEffects.label());
+        return Component.literal("Particle Amount: " + TimberConfig.get().fellingEffects.label());
     }
 
     // a toggle that flips the named boolean config key and saves it.
