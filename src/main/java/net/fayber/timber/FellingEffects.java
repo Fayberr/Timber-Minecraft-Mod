@@ -3,7 +3,7 @@ package net.fayber.timber;
 import java.util.Locale;
 
 public enum FellingEffects {
-    UNSUPPRESSED("Unsuppressed"), MINIMIZED("Minimized"), SUPPRESSED("Suppressed");
+    UNSUPPRESSED("Full"), MINIMIZED("Less"), SUPPRESSED("None");
 
     private final String label;
 
