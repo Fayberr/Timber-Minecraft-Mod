@@ -40,7 +40,7 @@ built-in screen is used instead.
 | `wear_out` | true | Axes lose one durability point per chopped log. |
 | `drop_loot` | false | False drops items at the block, true gives them to your inventory. |
 | `hunger` | false | Apply hunger scaled to the tree size. |
-| `suppress_break_effects` | true | Suppress particles and sounds for Timber-felled blocks, including slow chopping. The manually mined block keeps its normal effects. |
+| `felling_effects` | minimized | Cycle through unsuppressed (full particles and sounds), minimized (two particles per block, no extra sounds), and suppressed (no felling effects). Applies to instant and slow chopping. |
 | `persistent` | false | Also chop persistent (placed) leaves. |
 | `wooden_axe` | true | Wooden axes may fell trees. |
 | `stone_axe` | true | Stone axes may fell trees. |
@@ -54,7 +54,7 @@ built-in screen is used instead.
 | `max_tree_size` | 555 | Maximum number of logs counted as one tree. |
 | `min_leaves_found` | 5 | Minimum leaves attached before a tree is felled. |
 
-The old `stop_sound` command key remains an alias. Existing configs without `suppress_break_effects` use the new enabled default; save settings to write the new key.
+The Effects setting cycles through Unsuppressed, Minimized, and Suppressed. The manually mined block keeps its normal effects. Existing `suppress_break_effects` values migrate to suppressed or unsuppressed; new configs default to minimized. Legacy `suppress_break_effects` and `stop_sound` boolean command keys still work. Use `/timber config set felling_effects minimized` to select the reduced effect.
 
 ## Details
 
