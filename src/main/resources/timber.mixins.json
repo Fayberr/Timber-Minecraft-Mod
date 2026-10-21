@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "net.fayber.timber.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "ServerLevelMixin",
+    "ServerPlayerGameModeMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
