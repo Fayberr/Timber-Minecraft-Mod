@@ -146,6 +146,8 @@ public class TimberMod implements ModInitializer {
         } catch (IllegalArgumentException e) {
             source.sendFailure(Component.literal(key.equalsIgnoreCase("felling_effects")
                     ? "[Timber] felling_effects expects unsuppressed, minimized, or suppressed."
+                    : key.equalsIgnoreCase("minimized_particles")
+                    ? "[Timber] minimized_particles expects a whole number from 1 to 64."
                     : "[Timber] " + key + " expects a number."));
             return 0;
         }

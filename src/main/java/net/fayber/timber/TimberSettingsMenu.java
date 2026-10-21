@@ -101,7 +101,10 @@ public final class TimberSettingsMenu {
                 "Gives a hunger effect for 1 second at the same level as the tree size.");
         player.sendSystemMessage(Component.literal("[ " + TimberConfig.get().fellingEffects.label() + " ] Felling Effects")
                 .withStyle(style(ChatFormatting.GOLD, "felling_effects",
-                        "Cycle: Unsuppressed, Minimized, Suppressed. Minimized shows two particles per block without extra sounds.")));
+                        "Cycle: Unsuppressed, Minimized, Suppressed. Minimized shows adjustable particles per block without extra sounds.")));
+        if (TimberConfig.get().fellingEffects == FellingEffects.MINIMIZED) {
+            intLine(player, "minimized_particles", "Particles Per Block", "Range: 1 to 64. Default: 2.");
+        }
         booleanLine(player, "persistent", "Destroy Player-Placed Trees",
                 "Also destroys player-placed trees (persistent leaves). Use with care.");
     }

@@ -39,6 +39,7 @@ public final class TimberConfig {
     public boolean dropLoot = false;
     public boolean hunger = false;
     public FellingEffects fellingEffects = FellingEffects.MINIMIZED;
+    public int minimizedParticles = 2;
     public boolean persistent = false;
 
     // Which axes may fell.
@@ -91,6 +92,7 @@ public final class TimberConfig {
         if (raw.drop_loot != null) c.dropLoot = raw.drop_loot;
         if (raw.hunger != null) c.hunger = raw.hunger;
         c.fellingEffects = FellingEffects.resolve(raw.felling_effects, raw.suppress_break_effects);
+        if (raw.minimized_particles != null) c.minimizedParticles = Math.clamp(raw.minimized_particles, 1, 64);
         if (raw.persistent != null) c.persistent = raw.persistent;
         if (raw.wooden_axe != null) c.woodenAxe = raw.wooden_axe;
         if (raw.stone_axe != null) c.stoneAxe = raw.stone_axe;
@@ -121,6 +123,7 @@ public final class TimberConfig {
         raw.drop_loot = INSTANCE.dropLoot;
         raw.hunger = INSTANCE.hunger;
         raw.felling_effects = INSTANCE.fellingEffects.key();
+        raw.minimized_particles = INSTANCE.minimizedParticles;
         raw.persistent = INSTANCE.persistent;
         raw.wooden_axe = INSTANCE.woodenAxe;
         raw.stone_axe = INSTANCE.stoneAxe;
@@ -158,6 +161,7 @@ public final class TimberConfig {
             case "wear_out" -> c.wearOut = parseBool(value);
             case "drop_loot" -> c.dropLoot = parseBool(value);
             case "hunger" -> c.hunger = parseBool(value);
+            case "minimized_particles" -> c.minimizedParticles = FellingEffects.particleCount(parseInt(value));
             case "felling_effects" -> c.fellingEffects = FellingEffects.parse(value);
             case "suppress_break_effects", "stop_sound" -> c.fellingEffects =
                     parseBool(value) ? FellingEffects.SUPPRESSED : FellingEffects.UNSUPPRESSED;
@@ -215,6 +219,7 @@ public final class TimberConfig {
     public static int getInt(String key) {
         TimberConfig c = INSTANCE;
         return switch (key.toLowerCase()) {
+            case "minimized_particles" -> c.minimizedParticles;
             case "blocks_per_chop" -> c.blocksPerChop;
             case "time_between_chops" -> c.timeBetweenChops;
             case "max_tree_size" -> c.maxTreeSize;
@@ -247,6 +252,7 @@ public final class TimberConfig {
                 + ", drop_loot=" + dropLoot
                 + ", hunger=" + hunger
                 + ", felling_effects=" + fellingEffects.key()
+                + ", minimized_particles=" + minimizedParticles
                 + ", persistent=" + persistent
                 + ", wooden_axe=" + woodenAxe
                 + ", stone_axe=" + stoneAxe
@@ -277,6 +283,7 @@ public final class TimberConfig {
         Boolean drop_loot;
         Boolean hunger;
         String felling_effects;
+        Integer minimized_particles;
         Boolean suppress_break_effects;
         Boolean persistent;
         Boolean wooden_axe;

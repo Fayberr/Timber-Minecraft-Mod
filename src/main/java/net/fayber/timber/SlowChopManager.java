@@ -98,7 +98,7 @@ public class SlowChopManager {
         } else if (config.fellingEffects == FellingEffects.MINIMIZED) {
             level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state),
                     pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
-                    2, 0.25, 0.25, 0.25, 0.05);
+                    config.minimizedParticles, 0.25, 0.25, 0.25, 0.05);
         }
 
         // Replace with air.
