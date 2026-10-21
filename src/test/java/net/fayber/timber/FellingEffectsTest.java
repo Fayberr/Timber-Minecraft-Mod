@@ -18,6 +18,19 @@ public final class FellingEffectsTest {
         System.out.println("Felling effect cycle, defaults, migration and validation passed");
     }
 
+    @org.junit.Test
+    public void particleCountsAreBounded() {
+        check(FellingEffects.particleCount(1) == 1);
+        check(FellingEffects.particleCount(2) == 2);
+        check(FellingEffects.particleCount(64) == 64);
+        for (int count : new int[]{0, -1, 65, Integer.MAX_VALUE}) {
+            try {
+                FellingEffects.particleCount(count);
+                throw new AssertionError("Out-of-range particle count accepted");
+            } catch (IllegalArgumentException expected) { }
+        }
+    }
+
     private static void check(boolean condition) {
         if (!condition) throw new AssertionError();
     }
